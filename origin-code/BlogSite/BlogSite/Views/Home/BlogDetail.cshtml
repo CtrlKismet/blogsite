@@ -1,0 +1,64 @@
+﻿@using BlogSite.Models
+@using BlogSite.Controllers
+@using System.Globalization
+
+@model int
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section _extraCSS {
+    <link href="https://cdnjs.loli.net/ajax/libs/github-markdown-css/3.0.1/github-markdown.min.css" rel="stylesheet">
+    <link href="https://cdnjs.loli.net/ajax/libs/highlight.js/9.15.6/styles/xcode.min.css" rel="stylesheet">
+}
+
+@section _extraJS{
+    <script src="https://cdnjs.loli.net/ajax/libs/simplemde/1.11.2/simplemde.min.js"></script>
+    <script src="https://cdnjs.loli.net/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
+    <script src="~/js/blogdetail_script.js"></script>
+    <script data-isso="https://isso.ctrlkismet.top/" src="https://isso.ctrlkismet.top/js/embed.min.js"></script>
+}
+
+@section _extraAside {
+    <div class="menu-list" id="list_of_menu">
+        <div class="list-title">目录</div>
+        <div class="list-item" v-for="item in menu">
+            <a :href="'#'+item.pos">{{item.title}}</a>
+        </div>
+    </div>
+}
+<input id="blog_detail_ID" style="height:0;width:0;display:none;" value="@Model" />
+<div class="blog" id="blog_detail">
+    @if (Context.User.Identity.IsAuthenticated)
+    {
+        <i class="fa fa-edit" style="float:right;cursor:pointer;" onclick="window.location.href=rootsrc+'authorization/management?id='+document.getElementById('blog_detail_ID').value"></i>
+    }
+    <div class="blog-header">
+        <div class="blog-title">{{blog.title}}</div>
+        <div class="tag-list">
+            <p style="font-size:17px;">标签：</p>
+            <div class="tag" v-for="tagName in tagsName">{{tagName}}</div>
+        </div>
+    </div>
+    <div style="display: none;">
+        <textarea cols="0" rows="0" id="blogContent">{{blog.content}}</textarea>
+    </div>
+    <div class="markdown-body blog-content"></div>
+    <div class="blog-footer">
+        <div id="modifyedTime">{{"最后编辑于" + new Date(blog.lastModifyTime).toLocaleString()}}</div>
+    </div>
+</div>
+<div class="turn-page" id="pageTurning">
+    <span v-if="pre==''"></span>
+    <div class="pre" @@click="linkTo(-1)" v-if="pre!=''">
+        <i class=" fa fa-arrow-left"></i>
+        <span>上一篇</span>
+        <span class="ellipsis">{{pre}}</span>
+    </div>
+    <div class="nxt" @@click="linkTo(1)" v-if="nxt!=''">
+        <span>下一篇</span>
+        <span class="ellipsis">{{nxt}}</span>
+        <i class="fa fa-arrow-right"></i>
+    </div>
+</div>
+<section id="isso-thread"></section>

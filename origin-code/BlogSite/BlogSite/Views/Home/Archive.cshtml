@@ -1,0 +1,11 @@
+﻿@{
+    ViewData["Title"] = "归档";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section _extraJS {
+    <script src="~/js/archive_script.js"></script>
+}
+
+<archive_blog v-for="(value,index) in blog_msg" :blog_msg="value" :i="index" :key="index">
+</archive_blog>

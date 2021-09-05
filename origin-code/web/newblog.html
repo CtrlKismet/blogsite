@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>个人博客</title>
+    <link href="https://cdnjs.loli.net/ajax/libs/simplemde/1.11.2/simplemde.min.css" rel="stylesheet">
+    <link href="https://cdnjs.loli.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="./css/style.css" rel="stylesheet">
+    <link href="./css/global.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div class="main-page">
+        <nav class="head-bar">
+            <div class="hover"><a href="/">.◕ᴗ◕.</a></div>
+            <div id="ctrlkismet">CtrlKismet's Blog</div>
+            <div>
+                <a href="http://www.ctrlkismet.top/authorization/newblog"><i class="fa fa-plus"></i></a>&nbsp;|&nbsp;<a
+                    href="http://www.ctrlkismet.top/authorization/logout"><i class="fa fa-sign-out"></i></a>
+            </div>
+        </nav>
+        <div class="content">
+            <main id="home">
+                <input id="blogID" style="height:0;width:0;display:none;" value="1" />
+                <form class="newblog" id="blog_message">
+                    <div class="blog-prop">
+                        <div>
+                            <p>标题</p>
+                        </div>
+                        <div><input v-model="article.title" type="text" /></div>
+                    </div>
+                    <div class="blog-prop">
+                        <div>
+                            <p>缩略字</p>
+                        </div>
+                        <div><textarea v-model="article.ellipsisContent"></textarea></div>
+                    </div>
+                    <div class="blog-prop">
+                        <div>
+                            <p>内容</p>
+                        </div>
+                        <div id="mdEditor">
+                            <textarea cols="30" rows="100" id="mdtest" v-model="article.content"></textarea>
+                        </div>
+                    </div>
+                    <div class="blog-prop">
+                        <div>
+                            <p>标签</p>
+                        </div>
+                        <!-- <input type="text" /> -->
+                        <div class="tag-list">
+                            <div class="tag" v-for="item in tag" :value="item.id"
+                                :style="{backgroundColor:BGcolor[BGcnt[item.id]]}">
+                                <input type="checkbox" :id="item.id" name="tagID" :value="item.id" style="display:none;"
+                                    :checked="BGcnt[item.id]" />
+                                <label :for="item.id" @click="reverseBG(item.id)">{{item.name}}</label>
+                            </div>
+                        </div>
+                    </div>
+                    <input v-if="postOrput<0" type="button" value="提交" @click="uploadForm()" />
+                    <input v-if="postOrput>0" type="button" value="提交" @click="updateForm()" />
+                </form>
+            </main>
+            <aside>
+                <div class="clock">
+                    <div class="timeNum"></div>
+                    <div class="timeNum"></div>
+                    <span>:</span>
+                    <div class="timeNum"></div>
+                    <div class="timeNum"></div>
+                    <span>:</span>
+                    <div class="timeNum"></div>
+                    <div class="timeNum"></div>
+                </div>
+                <div id="YYMMDD"></div>
+                <hr />
+            </aside>
+        </div>
+        <div class="footer">
+            <div class="text">
+                <span>&copy;CtrlKismet's Blog</span>
+                <span> | Powered by <a href="https://dotnet.github.io/">.NET Core</a></span>
+            </div>
+            <div class="beian">
+                <a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=33011802001388"
+                    style="display:inline-block;text-decoration:none;height:20px;line-height:20px;">
+                    <img src="./image/beian.png" style="float:left;" />
+                    <p style="float:left;height:20px;line-height:20px;margin: 0px 0px 0px 5px; color:#939393;">浙公网安备
+                        33011802001388号</p>
+                </a>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.loli.net/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.loli.net/ajax/libs/vue/2.6.10/vue.js"></script>
+    <!-- <script src="https://unpkg.com/wangeditor@3.1.1/release/wangEditor.min.js"></script> -->
+    <script src="https://cdnjs.loli.net/ajax/libs/simplemde/1.11.2/simplemde.min.js"></script>
+    <script src="./js/script.js"></script>
+    <script src="./js/newblog_script.js"></script>
+</body>
+
+</html>

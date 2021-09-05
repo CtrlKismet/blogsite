@@ -1,0 +1,51 @@
+﻿@model int?
+@{
+    ViewData["Title"] = "新建博客";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section _extraCSS {
+    <link href="https://cdnjs.loli.net/ajax/libs/simplemde/1.11.2/simplemde.min.css" rel="stylesheet">
+    <link href="https://cdnjs.loli.net/ajax/libs/github-markdown-css/3.0.1/github-markdown.min.css" rel="stylesheet">
+}
+
+@section _extraJS {
+    <script src="https://cdnjs.loli.net/ajax/libs/simplemde/1.11.2/simplemde.min.js"></script>
+    <script src="~/js/newblog_script.js"></script>
+}
+
+<input id="blogID" style="height:0;width:0;display:none;" value="@Model" />
+<form class="newblog" id="blog_message">
+    <div class="blog-prop">
+        <div>
+            <p>标题</p>
+        </div>
+        <div><input v-model="article.title" id="standard_width_of_editor" type="text" /></div>
+    </div>
+    <div class="blog-prop">
+        <div>
+            <p>缩略字</p>
+        </div>
+        <div><textarea v-model="article.ellipsisContent"></textarea></div>
+    </div>
+    <div class="blog-prop">
+        <div>
+            <p>内容</p>
+        </div>
+        <div id="mdEditor"><textarea cols="30" rows="100" id="mdtest" v-model="article.content"></textarea></div>
+    </div>
+    <div class="blog-prop">
+        <div>
+            <p>标签</p>
+        </div>
+        <div class="tag-list">
+            <div class="tag" v-for="item in tag" :value="item.id" :style="{backgroundColor:BGcolor[BGcnt[item.id]]}">
+                <input type="checkbox" :id="item.id" name="tagID" :value="item.id" style="display:none;"
+                       :checked="BGcnt[item.id]" />
+                <label :for="item.id" @@click="reverseBG(item.id)">{{item.name}}</label>
+            </div>
+        </div>
+    </div>
+    <input v-if="postOrput<0" type="button" value="提交" @@click="uploadForm()" />
+    <input v-if="postOrput>0" type="button" value="提交" @@click="updateForm()" />
+</form>

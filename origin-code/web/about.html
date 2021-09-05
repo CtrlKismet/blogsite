@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>个人博客</title>
+    <link href="./css/style.css" rel="stylesheet">
+    <link href="./css/global.css" rel="stylesheet">
+</head>
+
+<body>
+    <nav class="head-bar">
+        <div><a href="/">｡◕ᴗ◕｡</a></div>
+        <div><a href="/" title="关于">CtrlKismet</a></div>
+    </nav>
+    <div class="content">
+        <main id="home">
+            <div class="blog about">
+                <div class="blog-header">
+                    <div class="blog-title">关于我</div>
+                </div>
+                <div class="blog-content">
+
+                </div>
+                <div class="blog-footer">
+                    <div id="modifyedTime">最后编辑于2019/1/1</div>
+                </div>
+            </div>
+        </main>
+        <aside>
+            <div class="sculptrue"><img src="./image/head.jpg"></div>
+            <div class="clock">
+                <div class="fortimeAni">
+                    <span class="timeHour" id="hour00"></span>
+                    <span class="timeHour behind" id="hour01"></span>
+                </div>
+                <div class="fortimeAni">
+                    <span class="timeHour" id="hour10"></span>
+                    <span class="timeHour behind" id="hour11"></span>
+                </div>
+                <span>:</span>
+                <div class="fortimeAni">
+                    <span class="timeMin" id="min00"></span>
+                    <span class="timeMin behind" id="min01"></span>
+                </div>
+                <div class="fortimeAni">
+                    <span class="timeMin" id="min10"></span>
+                    <span class="timeMin behind" id="min11"></span>
+                </div>
+                <span>:</span>
+                <div class="fortimeAni">
+                    <span class="timeSec" id="sec00"></span>
+                    <span class="timeSec behind" id="sec01"></span>
+                </div>
+                <div class="fortimeAni">
+                    <span class="timeSec" id="sec10"></span>
+                    <span class="timeSec behind" id="sec11"></span>
+                </div>
+            </div>
+            <div id="YYMMDD"></div>
+            <hr />
+            <div class="menu-list" id="list_of_menu">
+                <div class="list-title">目录</div>
+                <div class="list-item" v-for="item in menu">
+                    <a :href="'#'+item.pos" @click="scrollDown">{{item.title}}</a>
+                </div>
+            </div>
+        </aside>
+    </div>
+    <div class="footer">
+        <div class="text">
+            <span>&copy;CtrlKismet's Blog</span>
+            <span> | Powered by <a href="https://dotnet.github.io/">.NET Core</a></span>
+        </div>
+        <div class="beian">
+            <a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=33011802001388"
+                style="display:inline-block;text-decoration:none;height:20px;line-height:20px;">
+                <img src="./image/beian.png" style="float:left;" />
+                <p style="float:left;height:20px;line-height:20px;margin: 0px 0px 0px 5px; color:#939393;">浙公网安备
+                    33011802001388号</p>
+            </a>
+        </div>
+    </div>
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.bootcss.com/marked/0.5.2/marked.min.js"></script>
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+      </script>
+    <script type="text/javascript" async
+        src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+    <script src="./js/script.js"></script>
+    <script src="./js/blogdetail_script.js"></script>
+</body>
+
+</html>

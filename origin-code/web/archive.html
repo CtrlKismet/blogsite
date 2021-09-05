@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>个人博客</title>
+    <link href="https://cdnjs.loli.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="./css/style.css" rel="stylesheet" />
+    <link rel="shortcut icon" id="web_icon" type="image/x-icon" href="./faviconIN.ico" />
+</head>
+
+<body onkeydown="listen_login('False')">
+    <div class="loading-page">
+        <i class="fa fa-spinner fa-spin fa-5x"></i>
+        <div>
+            <p>暂不支持手机查看</p>
+            <p>来自快期末考试的苦逼程序猿的歉意</p>
+        </div>
+    </div>
+    <div class="main-page">
+        <nav class="head-bar">
+            <div class="hover"><a href="/">.◕ᴗ◕.</a></div>
+            <div id="ctrlkismet">CtrlKismet's Blog</div>
+            <div class="hover"><a href="/">About</a></div>
+        </nav>
+        <div class="content">
+            <main id="home">
+                <archive_blog v-for="(value,index) in blog_msg" :blog_msg="value" :i="index" :key="index">
+                </archive_blog>
+                <!-- <div class="blog-archive">
+                    <div class="archive-header">
+                        <div class="blog-year">{{(blog_timeYear-1)}}</div>
+                        <div></div>
+                        <div>{{'共'+blog_count[1]+'篇'}}</div>
+                    </div>
+                    <div class="archive-content">
+                        <blog-msg v-for="blog in blog_msg[1]" v-bind="blog" :key="blog.id"></blog-msg>
+                    </div>
+                    <div class="archive-footer"></div>
+                </div> -->
+            </main>
+            <aside>
+                <div class="clock">
+                    <div class="timeNum"></div>
+                    <div class="timeNum"></div>
+                    <span>:</span>
+                    <div class="timeNum"></div>
+                    <div class="timeNum"></div>
+                    <span>:</span>
+                    <div class="timeNum"></div>
+                    <div class="timeNum"></div>
+                </div>
+                <div id="YYMMDD"></div>
+                <hr />
+                <div class="topRocket">
+                    <i class="fa fa-3x fa-arrow-up" onclick="UpToTop()"></i>
+                </div>
+            </aside>
+        </div>
+        <div class="footer">
+            <div class="text">
+                <span>&copy;CtrlKismet's Blog</span>
+                <span> | Powered by <a href="https://dotnet.github.io/">.NET Core</a></span>
+            </div>
+            <div class="beian">
+                <a target="_blank" href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=33011802001388"
+                    style="display:inline-block;text-decoration:none;height:20px;line-height:20px;">
+                    <img src="./image/beian.png" style="float:left;" />
+                    <p style="float:left;height:20px;line-height:20px;margin: 0px 0px 0px 5px; color:#939393;">浙公网安备
+                        33011802001388号</p>
+                </a>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.loli.net/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.loli.net/ajax/libs/vue/2.6.10/vue.js"></script>
+    <script src="./js/script.js"></script>
+    <script src="./js/archive_script.js"></script>
+</body>
+
+</html>

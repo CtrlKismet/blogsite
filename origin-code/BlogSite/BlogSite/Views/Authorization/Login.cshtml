@@ -1,0 +1,49 @@
+﻿
+@{
+    ViewData["Title"] = "登录";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section _extraCSS {
+    <style>
+        #login {
+            margin: auto;
+            margin-top: 4em;
+            width: 300px;
+        }
+
+            #login input {
+                width: 260px;
+                padding: 5px 20px;
+                margin: 10px 0;
+                text-align: center;
+                font-size: 1em;
+                border-radius: 5px;
+            }
+
+                #login input[type=submit] {
+                    width: 302px;
+                    background-color: aliceblue;
+                }
+    </style>
+}
+
+@section _extraJS {
+    <script>
+        window.onload = function () {
+            loadEl();
+        };
+
+        function enter_login() {
+            if (event.keyCode === 13) {
+                document.getElementById('login').submit();
+            }
+        }
+    </script>
+}
+
+<form id="login" method="post" action="/authorization/login">
+    <div><input type="text" name="name" /></div>
+    <div><input type="password" name="pwd" onkeydown="enter_login()" /></div>
+    <div><input type="submit" value="login" /></div>
+</form>

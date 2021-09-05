@@ -1,0 +1,22 @@
+﻿@{
+    ViewData["Title"] = "首页";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section _extraJS {
+    <script src="~/js/index_script.js"></script>
+}
+
+@section _extraAside {
+    <div class="tag-list" id="list_of_tags">
+        <div class="list-title">标签</div>
+        <div class="list-item" v-for="item in tag">
+            <a @@click="search_blog_by_tagid(item.id,item.name)">{{item.name}}</a>
+        </div>
+    </div>
+}
+<div class="filter" v-show="isFilter">
+    {{message}}的查询结果：<span class="fa fa-remove" aria-hidden="true" @@click="removeFilter"></span>
+</div>
+<blog-article v-for="art in blog" v-bind="art" :key="art.id">
+</blog-article>
