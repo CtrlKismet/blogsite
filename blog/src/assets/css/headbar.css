@@ -1,0 +1,61 @@
+
+.head-bar {
+    user-select: none;
+    position: fixed;
+    z-index: 10000;
+    /* top: -2.5em; */
+    height: 2.5em;
+    width: 100%;
+    opacity: .8;
+    background-color: rgb(255, 203, 83);
+    color: rgb(91, 40, 11);
+    box-shadow: 0 0 .3em rgba(0, 0, 0, .8);
+    display: grid;
+    /*grid-template-rows: 100%;*/
+    grid-template-columns: 18% auto 18%;
+    grid-template-areas: 'home menu about';
+    transition: top 1s;
+}
+
+.head-bar div {
+    /* opacity: 0; */
+    padding: 0 10px;
+    height: 100%;
+    line-height: 2.3em;
+    transition: background-color .4s, opacity .5s 2s;
+}
+
+.head-bar div.headbar-home {
+    grid-area: home;
+    justify-self: end;
+}
+
+.head-bar div#headbar-menu {
+    grid-area: menu;
+    justify-self: start;
+}
+
+.head-bar div.headbar-about {
+    grid-area: about;
+    justify-self: start;
+}
+
+.head-bar a {
+    text-decoration: none;
+    color: rgb(91, 40, 11);
+}
+
+.head-bar div.hover:hover {
+    background-color: rgba(255, 255, 255, .4);
+}
+
+.head-bar div i {
+    padding: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color .4s;
+}
+
+.head-bar div i:hover {
+    background-color: rgba(255, 255, 255, .4);
+}
