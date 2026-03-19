@@ -24,19 +24,15 @@
   </div>
 </template>
 
-<script setup>
-defineProps({
-  year: {
-    type: [String, Number],
-    required: true
-  },
-  articles: {
-    type: Array,
-    required: true
-  }
-})
+<script setup lang="ts">
+import type { ArchiveArticle } from '../../types'
 
-function formatDate(dateStr) {
+defineProps<{
+  year: string | number
+  articles: ArchiveArticle[]
+}>()
+
+function formatDate(dateStr: string): string {
   if (!dateStr) return ''
   const d = new Date(dateStr)
   return (d.getMonth() + 1) + '-' + d.getDate()

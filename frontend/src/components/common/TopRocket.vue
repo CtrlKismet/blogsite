@@ -4,18 +4,18 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 
 const isVisible = ref(false)
 const scrollThreshold = 260
 
-function handleScroll() {
+function handleScroll(): void {
   if (window.innerWidth <= 900) return
   isVisible.value = window.scrollY > scrollThreshold
 }
 
-function scrollToTop() {
+function scrollToTop(): void {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 

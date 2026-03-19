@@ -4,11 +4,13 @@
  */
 import MarkdownIt from 'markdown-it'
 import markdownItKatex from '@vscode/markdown-it-katex'
+import type { Tag, ArticleSummary, ArticleDetail, AboutArticle, ArchiveGroup, ArticleListResponse } from '../types'
 
 const md = new MarkdownIt({
   html: true,
   linkify: true,
-  typographer: true
+  typographer: true,
+  breaks: true
 })
 
 // 启用 KaTeX 数学公式支持（$...$ 行内, $$...$$ 块级）
@@ -17,7 +19,7 @@ md.use(markdownItKatex.default)
 /**
  * 渲染 Markdown 并去掉开头的 H1（标题由组件 blog-header 显示）
  */
-function renderMd(markdown) {
+function renderMd(markdown: string): string {
   let html = md.render(markdown)
   // 移除第一个 <h1>...</h1>
   html = html.replace(/^<h1[^>]*>.*?<\/h1>\n?/, '')
@@ -110,14 +112,14 @@ const article2Markdown = `# 博客开发进度汇总
 ***Bless All.***`
 
 // ===== Mock 标签 =====
-const mockTags = [
+const mockTags: Tag[] = [
   { id: 1, name: '技术' },
   { id: 2, name: '随笔' },
   { id: 3, name: '生活' }
 ]
 
 // ===== Mock 文章列表 =====
-const mockArticles = [
+const mockArticles: ArticleSummary[] = [
   {
     id: 1,
     title: '永远相信美好的事情即将发生',
@@ -139,7 +141,7 @@ const mockArticles = [
 ]
 
 // ===== Mock 文章详情 =====
-const mockArticleDetails = {
+const mockArticleDetails: Record<number, ArticleDetail> = {
   1: {
     ...mockArticles[0],
     content_html: renderMd(article1Markdown),
@@ -153,7 +155,7 @@ const mockArticleDetails = {
 }
 
 // ===== Mock About =====
-const mockAbout = {
+const mockAbout: AboutArticle = {
   id: 0,
   title: '关于我',
   content_html: renderMd(aboutMarkdown),
@@ -162,7 +164,7 @@ const mockAbout = {
 }
 
 // ===== Mock 归档 =====
-const mockArchive = [
+const mockArchive: ArchiveGroup[] = [
   {
     year: 2018,
     articles: [
@@ -175,19 +177,40 @@ const mockArchive = [
 // ===== 导出模拟 API =====
 export const useMock = true
 
-export function mockGetArticles(params = {}) {
+interface MockArticleParams {
+  tag_id?: number
+  page?: number
+  size?: number
+}
+
+export function mockGetArticles(params: MockArticleParams = {}) {
   let items = [...mockArticles]
   if (params.tag_id) {
     items = items.filter(a => a.tags.some(t => t.id === params.tag_id))
   }
+  // 按 id 倒序排列
+  items.sort((a, b) => b.id - a.id)
   return Promise.resolve({
-    data: { items, total: items.length, page: 1, size: 20 }
+    data: { items, total: items.length, page: 1, size: 20 } as ArticleListResponse
   })
 }
 
-export function mockGetArticle(id) {
-  const detail = mockArticleDetails[id]
-  if (detail) return Promise.resolve({ data: detail })
+export function mockGetArticle(id: number | string) {
+  const numId = typeof id === 'string' ? parseInt(id) : id
+  const detail = mockArticleDetails[numId]
+  if (detail) {
+    // 计算上下篇
+    const allIds = Object.keys(mockArticleDetails).map(Number).sort((a, b) => a - b)
+    const idx = allIds.indexOf(numId)
+    const prevId = idx > 0 ? allIds[idx - 1] : null
+    const nextId = idx < allIds.length - 1 ? allIds[idx + 1] : null
+    const result: ArticleDetail = {
+      ...detail,
+      prev_article: prevId ? { id: prevId, title: mockArticleDetails[prevId].title } : null,
+      next_article: nextId ? { id: nextId, title: mockArticleDetails[nextId].title } : null
+    }
+    return Promise.resolve({ data: result })
+  }
   return Promise.reject({ response: { status: 404 } })
 }
 

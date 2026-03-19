@@ -2,35 +2,32 @@
 .article-card {
   margin: 5px;
   display: grid;
-  grid-template-columns: 0px 1fr;
+  grid-template-columns: 1% 99%;
+  grid-template-areas: 'timeStamp article';
   width: calc(100% - 10px);
   align-items: center;
-  transition: grid-template-columns var(--transition-normal);
 }
 
 .article-card .time-stamp {
   width: 70px;
   height: 65px;
   padding: 5px;
-  opacity: 0;
-  transition: opacity var(--transition-normal), margin-left var(--transition-normal);
-  overflow: hidden;
+  transition: margin-left var(--transition-normal);
 }
 
 .article-card .time-stamp p {
   text-align: center;
-  font-size: .8em;
-  line-height: 1.3;
 }
 
 .article-card .art-content {
   display: block;
   padding: 10px 20px;
+  margin-left: -7px;
   border-top-right-radius: 7px;
   border-bottom-right-radius: 7px;
   background-color: var(--color-card);
   box-shadow: 0 0 10px var(--color-card-shadow);
-  transition: background-color var(--transition-normal);
+  transition: background-color var(--transition-normal), margin-left var(--transition-normal);
 }
 
 .article-card .art-content .art-title {
@@ -46,15 +43,12 @@
   text-overflow: ellipsis;
 }
 
-.article-card:hover {
-  grid-template-columns: 70px 1fr;
-}
-
 .article-card:hover .time-stamp {
-  opacity: 1;
+  margin-left: -10px;
 }
 
 .article-card:hover .art-content {
+  margin-left: 60px;
   background-color: var(--color-card-hover);
   box-shadow: 0 0 10px #adadad;
 }
@@ -209,6 +203,20 @@
 .blog-footer .modified-time {
   padding: .4em 0;
   float: right;
+}
+
+/* ===== About Page ===== */
+.about {
+  font-size: .8em;
+}
+
+aside .sculptrue {
+  padding: 5%;
+}
+
+aside .sculptrue > img {
+  width: 100%;
+  border-radius: 5%;
 }
 
 /* ===== Turn Page ===== */

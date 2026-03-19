@@ -15,6 +15,7 @@
       </div>
     </main>
     <Sidebar
+      mode="tags"
       :tags="tags"
       :active-tag="filterTag?.id"
       @tag-click="onTagClick"
@@ -22,25 +23,29 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import type { ArticleSummary, Tag } from '../types'
 import ArticleCard from '../components/article/ArticleCard.vue'
 import Sidebar from '../components/layout/Sidebar.vue'
 import { getArticles } from '../api/articles'
 import { getTags } from '../api/tags'
 
-const articles = ref([])
-const tags = ref([])
-const filterTag = ref(null)
+const articles = ref<ArticleSummary[]>([])
+const tags = ref<Tag[]>([])
+const filterTag = ref<Tag | null>(null)
 const loading = ref(false)
 
-async function fetchArticles(tagId = null) {
+async function fetchArticles(tagId: number | null = null): Promise<void> {
   loading.value = true
   try {
-    const params = { page: 1, size: 20 }
+    const params: { page: number; size: number; tag_id?: number } = { page: 1, size: 20 }
     if (tagId) params.tag_id = tagId
     const res = await getArticles(params)
-    articles.value = res.data.items || []
+    const items = res.data.items || []
+    // 按 id 倒序排列
+    items.sort((a, b) => b.id - a.id)
+    articles.value = items
   } catch (e) {
     console.error('获取文章列表失败', e)
   } finally {
@@ -48,7 +53,7 @@ async function fetchArticles(tagId = null) {
   }
 }
 
-async function fetchTags() {
+async function fetchTags(): Promise<void> {
   try {
     const res = await getTags()
     tags.value = res.data || []
@@ -57,7 +62,7 @@ async function fetchTags() {
   }
 }
 
-function onTagClick(tag) {
+function onTagClick(tag: Tag): void {
   if (filterTag.value?.id === tag.id) {
     removeFilter()
     return
@@ -66,7 +71,7 @@ function onTagClick(tag) {
   fetchArticles(tag.id)
 }
 
-function removeFilter() {
+function removeFilter(): void {
   filterTag.value = null
   fetchArticles()
 }

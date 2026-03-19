@@ -9,6 +9,7 @@
   text-align: center;
   display: flex;
   align-items: center;
+  justify-content: center;
   flex-direction: column;
   transition: opacity 1s;
 }
@@ -46,10 +47,16 @@
   margin-right: auto;
   display: flex;
   justify-content: space-between;
-  margin-top: 4.2em;
+  margin-top: 10em;
   margin-bottom: 1.2em;
+  opacity: 0;
+  transition: opacity 2s 2.5s, margin-top .8s 2.5s;
+}
+
+/* 入场动画：loaded 后显示内容 */
+html.loaded .content {
   opacity: 1;
-  transition: opacity 2s, margin-top .8s;
+  margin-top: 4.2em;
 }
 
 .content main {
@@ -65,7 +72,7 @@
   user-select: none;
   position: fixed;
   z-index: 10000;
-  top: 0;
+  top: calc(-1 * var(--headbar-height));
   height: var(--headbar-height);
   width: 100%;
   opacity: .8;
@@ -75,7 +82,12 @@
   display: grid;
   grid-template-columns: 18% auto 18%;
   grid-template-areas: 'home menu about';
-  transition: top .5s;
+  transition: top 1s;
+}
+
+/* 入场动画：loaded 后显示 head-bar */
+html.loaded .head-bar {
+  top: 0;
 }
 
 .head-bar.hidden {
@@ -86,7 +98,13 @@
   padding: 0 10px;
   height: 100%;
   line-height: 2.3em;
-  transition: background-color var(--transition-normal);
+  opacity: 0;
+  transition: background-color var(--transition-normal), opacity .5s 2s;
+}
+
+/* 入场动画：loaded 后显示 nav items */
+html.loaded .head-bar .nav-item {
+  opacity: 1;
 }
 
 .head-bar .nav-home {
@@ -111,8 +129,22 @@
   color: var(--color-secondary-solid);
 }
 
-.head-bar .nav-item:hover {
+.head-bar .nav-item.hover:hover {
   background-color: rgba(255, 255, 255, .4);
+}
+
+/* ===== Page Transition ===== */
+.content-fade-enter-active {
+  transition: opacity 0.3s ease;
+}
+
+.content-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.content-fade-enter-from,
+.content-fade-leave-to {
+  opacity: 0;
 }
 
 /* ===== Footer ===== */
@@ -121,12 +153,19 @@
   height: var(--footer-height);
   font-size: .8em;
   display: grid;
-  grid-template-columns: auto 37% 37% auto;
-  grid-template-areas: '. text beian .';
+  grid-template-columns: auto 50% auto;
+  grid-template-areas: '. text .';
   align-items: center;
   background-color: var(--color-footer-bg);
   color: var(--color-footer-text);
   margin-top: auto;
+  opacity: 0;
+  transition: opacity 1s 4s;
+}
+
+/* 入场动画：loaded 后显示 footer */
+html.loaded .footer {
+  opacity: 1;
 }
 
 .footer a {
@@ -136,10 +175,5 @@
 
 .footer .text {
   grid-area: text;
-  justify-self: start;
-}
-
-.footer .beian {
-  grid-area: beian;
-  justify-self: end;
+  justify-self: center;
 }

@@ -37,7 +37,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
@@ -50,13 +50,13 @@ const username = ref('')
 const password = ref('')
 const error = ref('')
 
-async function handleLogin() {
+async function handleLogin(): Promise<void> {
   error.value = ''
   try {
     await authStore.login(username.value, password.value)
-    const redirect = route.query.redirect || '/admin/new'
+    const redirect = (route.query.redirect as string) || '/admin/new'
     router.push(redirect)
-  } catch (e) {
+  } catch (e: any) {
     error.value = e.response?.data?.detail || '登录失败'
   }
 }

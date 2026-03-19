@@ -11,7 +11,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 /**
  * Clock 组件 — 保留原有翻转缩放动画
  * 6 个数字格 + 2 个冒号分隔符
@@ -19,18 +19,18 @@
  */
 import { ref, onMounted, onUnmounted } from 'vue'
 
-const fade = ['scale(0,0)', 'scale(1,1)']
-const digits = ref(['0', '0', '0', '0', '0', '0'])
-const transforms = ref([
+const fade: string[] = ['scale(0,0)', 'scale(1,1)']
+const digits = ref<string[]>(['0', '0', '0', '0', '0', '0'])
+const transforms = ref<string[]>([
   'scale(1,1)', 'scale(1,1)', 'scale(1,1)',
   'scale(1,1)', 'scale(1,1)', 'scale(1,1)'
 ])
 
-const cnt = [0, 0, 0, 0, 0, 0]
-const number = ['-1', '-1', '-1', '-1', '-1', '-1']
-let intervalId = null
+const cnt: number[] = [0, 0, 0, 0, 0, 0]
+const number: string[] = ['-1', '-1', '-1', '-1', '-1', '-1']
+let intervalId: ReturnType<typeof setInterval> | null = null
 
-function refreshTime() {
+function refreshTime(): void {
   const timeNow = new Date()
     .toTimeString()
     .substring(0, 8)
@@ -47,7 +47,7 @@ function refreshTime() {
   }
 }
 
-function startClock() {
+function startClock(): void {
   // 立即显示当前时间，避免初始 00:00:00
   const timeNow = new Date().toTimeString().substring(0, 8).replace(/:/g, '')
   for (let i = 0; i < 6; i++) {
@@ -59,7 +59,7 @@ function startClock() {
   }
 }
 
-function stopClock() {
+function stopClock(): void {
   if (intervalId) {
     clearInterval(intervalId)
     intervalId = null

@@ -8,13 +8,5 @@
         <a href="https://vuejs.org/" target="_blank">Vue 3</a>
       </span>
     </div>
-    <div class="beian">
-      <a
-        target="_blank"
-        href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=33011802001388"
-      >
-        浙公网安备 33011802001388号
-      </a>
-    </div>
   </div>
 </template>

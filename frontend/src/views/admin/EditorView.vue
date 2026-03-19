@@ -55,9 +55,10 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import type { Tag, ArticleForm } from '../../types'
 import { getTags } from '../../api/tags'
 
 const route = useRoute()
@@ -67,17 +68,17 @@ const isEdit = computed(() => {
   return route.name === 'EditArticle' || route.name === 'EditAbout'
 })
 
-const form = ref({
+const form = ref<ArticleForm>({
   title: '',
   summary: '',
   header_image: '',
   content: ''
 })
 
-const allTags = ref([])
-const selectedTags = ref([])
+const allTags = ref<Tag[]>([])
+const selectedTags = ref<number[]>([])
 
-function toggleTag(tagId) {
+function toggleTag(tagId: number): void {
   const idx = selectedTags.value.indexOf(tagId)
   if (idx >= 0) {
     selectedTags.value.splice(idx, 1)
@@ -86,7 +87,7 @@ function toggleTag(tagId) {
   }
 }
 
-async function fetchTags() {
+async function fetchTags(): Promise<void> {
   try {
     const res = await getTags()
     allTags.value = res.data || []
@@ -95,7 +96,7 @@ async function fetchTags() {
   }
 }
 
-async function handleSubmit() {
+async function handleSubmit(): Promise<void> {
   // TODO: 调用后端 API 创建/更新文章
   console.log('提交文章', {
     ...form.value,

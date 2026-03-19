@@ -1,33 +1,27 @@
 /**
  * 格式化时间为 YYYY-MM-DD HH:mm
- * @param {string} dateStr - ISO 时间字符串
- * @returns {string}
  */
-export function formatTime(dateStr) {
+export function formatTime(dateStr: string): string {
   if (!dateStr) return ''
   const d = new Date(dateStr)
-  const pad = (n) => String(n).padStart(2, '0')
+  const pad = (n: number) => String(n).padStart(2, '0')
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
 /**
  * 格式化日期为 YYYY-MM-DD
- * @param {string} dateStr
- * @returns {string}
  */
-export function formatDate(dateStr) {
+export function formatDate(dateStr: string): string {
   if (!dateStr) return ''
   const d = new Date(dateStr)
-  const pad = (n) => String(n).padStart(2, '0')
+  const pad = (n: number) => String(n).padStart(2, '0')
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 
 /**
  * 格式化为相对时间
- * @param {string} dateStr
- * @returns {string}
  */
-export function timeAgo(dateStr) {
+export function timeAgo(dateStr: string): string {
   if (!dateStr) return ''
   const now = Date.now()
   const diff = now - new Date(dateStr).getTime()

@@ -3,17 +3,17 @@ import { ref, computed } from 'vue'
 import { login as apiLogin, verify as apiVerify } from '../api/auth'
 
 export const useAuthStore = defineStore('auth', () => {
-  const token = ref(localStorage.getItem('token') || '')
+  const token = ref<string>(localStorage.getItem('token') || '')
   const isAuthenticated = computed(() => !!token.value)
 
-  async function login(username, password) {
+  async function login(username: string, password: string) {
     const res = await apiLogin(username, password)
     token.value = res.data.access_token
     localStorage.setItem('token', token.value)
     return res
   }
 
-  async function checkAuth() {
+  async function checkAuth(): Promise<boolean> {
     if (!token.value) return false
     try {
       await apiVerify()
@@ -24,7 +24,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  function logout() {
+  function logout(): void {
     token.value = ''
     localStorage.removeItem('token')
   }
