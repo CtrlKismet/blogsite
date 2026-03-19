@@ -1,0 +1,57 @@
+:root {
+  /* 主色调 */
+  --color-primary: rgb(255, 203, 83);
+  --color-primary-dark: #fad070;
+  --color-secondary: rgba(56, 34, 11, .7);
+  --color-secondary-solid: rgb(91, 40, 11);
+
+  /* 背景 & 卡片 */
+  --color-bg: #e6e6e6;
+  --color-card: #fafafa;
+  --color-card-hover: #dedede;
+  --color-card-shadow: #ccc;
+
+  /* 文字 */
+  --color-text: #333333;
+  --color-text-light: #939393;
+  --color-title: burlywood;
+  --color-title-hover: brown;
+
+  /* 页脚 */
+  --color-footer-bg: rgba(56, 34, 11, .84);
+  --color-footer-text: wheat;
+
+  /* 选中样式 */
+  --color-selection-bg: rgba(56, 34, 11, .7);
+  --color-selection-text: rgb(255, 203, 83);
+
+  /* 侧边栏列表 */
+  --color-list-bg: #f7f7f7;
+  --color-list-hover: #ededed;
+  --color-list-active: #e0e0e0;
+
+  /* 边框 & 分割线 */
+  --color-border: #ccc;
+  --color-border-light: #e6e6e6;
+
+  /* 归档渐变 */
+  --color-archive-gradient-start: #ffcb5399;
+  --color-archive-gradient-mid: #ffcb5330;
+  --color-archive-gradient-end: #ffcb5320;
+
+  /* 尺寸 */
+  --content-width: 1300px;
+  --main-width: 960px;
+  --aside-width: 300px;
+  --headbar-height: 2.5em;
+  --footer-height: 3.5em;
+
+  /* 字体 */
+  --font-main: 'PingFang SC', 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  --font-clock: 'Gill Sans', 'Gill Sans MT', 'PingFang SC', Calibri, 'Trebuchet MS', sans-serif;
+
+  /* 过渡 */
+  --transition-fast: .3s;
+  --transition-normal: .4s;
+  --transition-slow: .6s;
+}

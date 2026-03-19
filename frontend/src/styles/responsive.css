@@ -1,0 +1,76 @@
+@media screen and (max-width: 1400px) {
+  html {
+    font-size: 14px;
+  }
+
+  .content {
+    width: 1000px;
+  }
+
+  .content main {
+    width: 660px;
+  }
+}
+
+@media screen and (max-width: 1050px) {
+  html {
+    font-size: 12px;
+  }
+
+  .content {
+    width: 870px;
+  }
+
+  .content main {
+    width: 630px;
+  }
+
+  .content aside {
+    width: 230px;
+  }
+
+  aside .top-rocket {
+    width: 215px;
+  }
+}
+
+/* mobile */
+@media screen and (max-width: 900px) {
+  .head-bar .nav-item i {
+    padding: 0;
+  }
+
+  .content {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .content main {
+    width: 100%;
+  }
+
+  .content aside {
+    width: 95%;
+    margin: auto;
+    margin-top: 1em;
+  }
+
+  .footer {
+    height: 5em;
+    grid-template-rows: 50% 50%;
+    grid-template-columns: 5% 95%;
+    grid-template-areas: '. text''. beian';
+  }
+
+  .footer .beian {
+    justify-self: start;
+  }
+
+  aside .top-rocket {
+    display: none;
+  }
+
+  .turn-page > div {
+    opacity: 1;
+  }
+}
