@@ -48,6 +48,12 @@ function refreshTime() {
 }
 
 function startClock() {
+  // 立即显示当前时间，避免初始 00:00:00
+  const timeNow = new Date().toTimeString().substring(0, 8).replace(/:/g, '')
+  for (let i = 0; i < 6; i++) {
+    digits.value[i] = timeNow[i]
+    number[i] = timeNow[i]
+  }
   if (!intervalId) {
     intervalId = setInterval(refreshTime, 500)
   }

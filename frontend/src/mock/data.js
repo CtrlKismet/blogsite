@@ -10,6 +10,16 @@ const md = new MarkdownIt({
   typographer: true
 })
 
+/**
+ * 渲染 Markdown 并去掉开头的 H1（标题由组件 blog-header 显示）
+ */
+function renderMd(markdown) {
+  let html = md.render(markdown)
+  // 移除第一个 <h1>...</h1>
+  html = html.replace(/^<h1[^>]*>.*?<\/h1>\n?/, '')
+  return html
+}
+
 // ===== About 页面内容 =====
 const aboutMarkdown = `# 关于我
 
@@ -128,12 +138,12 @@ const mockArticles = [
 const mockArticleDetails = {
   1: {
     ...mockArticles[0],
-    content_html: md.render(article1Markdown),
+    content_html: renderMd(article1Markdown),
     header_image: null
   },
   2: {
     ...mockArticles[1],
-    content_html: md.render(article2Markdown),
+    content_html: renderMd(article2Markdown),
     header_image: null
   }
 }
@@ -142,7 +152,7 @@ const mockArticleDetails = {
 const mockAbout = {
   id: 0,
   title: '关于我',
-  content_html: md.render(aboutMarkdown),
+  content_html: renderMd(aboutMarkdown),
   published_at: '2018-12-18T00:00:00',
   updated_at: '2018-12-18T00:00:00'
 }
