@@ -3,12 +3,16 @@
  * 后端 API 就绪后删除此文件，切换到真实 API 调用
  */
 import MarkdownIt from 'markdown-it'
+import markdownItKatex from '@vscode/markdown-it-katex'
 
 const md = new MarkdownIt({
   html: true,
   linkify: true,
   typographer: true
 })
+
+// 启用 KaTeX 数学公式支持（$...$ 行内, $$...$$ 块级）
+md.use(markdownItKatex.default)
 
 /**
  * 渲染 Markdown 并去掉开头的 H1（标题由组件 blog-header 显示）

@@ -30,8 +30,8 @@ body {
 
 #app {
   min-height: 100vh;
-  position: relative;
-  padding-bottom: var(--footer-height);
+  display: flex;
+  flex-direction: column;
   box-sizing: border-box;
 }
 

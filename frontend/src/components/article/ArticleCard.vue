@@ -1,8 +1,8 @@
 <template>
   <div class="article-card">
     <div class="time-stamp">
-      <p>{{ month }}</p>
-      <p>{{ day }}</p>
+      <p>{{ year }}</p>
+      <p>{{ monthDay }}</p>
     </div>
     <router-link :to="`/blog/${article.id}`" class="art-content">
       <div class="art-title ellipsis">{{ article.title }}</div>
@@ -21,15 +21,17 @@ const props = defineProps({
   }
 })
 
-const month = computed(() => {
+const year = computed(() => {
   if (!props.article.published_at) return ''
   const d = new Date(props.article.published_at)
-  return (d.getMonth() + 1) + '月'
+  return d.getFullYear()
 })
 
-const day = computed(() => {
+const monthDay = computed(() => {
   if (!props.article.published_at) return ''
   const d = new Date(props.article.published_at)
-  return d.getDate() + ''
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${m}/${day}`
 })
 </script>

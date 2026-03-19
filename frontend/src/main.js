@@ -7,6 +7,7 @@ import './styles/global.css'
 import './styles/layout.css'
 import './styles/components.css'
 import './styles/responsive.css'
+import 'katex/dist/katex.min.css'
 
 import { initVisibility, initLoginShortcut } from './utils/visibility'
 
