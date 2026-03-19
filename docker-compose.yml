@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  # Python FastAPI backend
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: blog-api
+    restart: unless-stopped
+    environment:
+      - DB_PATH=/data/blog.db
+      - POSTS_DIR=/data/posts
+      - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
+      - ADMIN_USERNAME=${ADMIN_USERNAME}
+      - ADMIN_PASSWORD_HASH=${ADMIN_PASSWORD_HASH}
+      - TZ=Asia/Shanghai
+    volumes:
+      - /mnt/nas_smb/nas/blog:/data
+    expose:
+      - "8000"
+    networks:
+      - caddy-net
+
+networks:
+  caddy-net:
+    external: true
