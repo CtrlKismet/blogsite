@@ -53,6 +53,9 @@
     width: 95%;
     margin: auto;
     margin-top: 1em;
+    position: static;
+    max-height: none;
+    overflow-y: visible;
   }
 
   .footer {

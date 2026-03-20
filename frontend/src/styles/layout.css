@@ -90,7 +90,7 @@ html.loaded .head-bar {
   top: 0;
 }
 
-.head-bar.hidden {
+html.loaded .head-bar.hidden {
   top: calc(-1 * var(--headbar-height));
 }
 

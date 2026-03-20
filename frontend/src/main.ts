@@ -8,6 +8,7 @@ import './styles/layout.css'
 import './styles/components.css'
 import './styles/responsive.css'
 import 'katex/dist/katex.min.css'
+import '@fortawesome/fontawesome-free/css/all.min.css'
 
 import { initVisibility } from './utils/visibility'
 

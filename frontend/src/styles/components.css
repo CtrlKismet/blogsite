@@ -369,6 +369,11 @@ aside .sculptrue > img {
 aside {
   display: flex;
   flex-direction: column;
+  position: sticky;
+  top: calc(var(--headbar-height) + 1em);
+  align-self: flex-start;
+  max-height: calc(100vh - var(--headbar-height) - 2em);
+  overflow-y: auto;
 }
 
 aside .clock {

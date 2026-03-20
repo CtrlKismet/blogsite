@@ -11,7 +11,7 @@
         v-for="article in articles"
         :key="article.id"
       >
-        <span class="archive-points">●</span>
+        <span class="archive-points"><i class="fa fa-circle"></i></span>
         <div class="blog-ellipsis ellipsis">
           <router-link :to="`/blog/${article.id}`">
             {{ article.title }}

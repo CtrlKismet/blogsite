@@ -3,7 +3,7 @@
     <main>
       <div class="filter" v-if="filterTag">
         {{ filterTag.name }} 的查询结果：
-        <span class="remove-icon" @click="removeFilter">✕</span>
+        <span class="remove-icon" @click="removeFilter"><i class="fa fa-remove"></i></span>
       </div>
       <ArticleCard
         v-for="article in articles"
