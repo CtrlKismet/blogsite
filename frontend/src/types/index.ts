@@ -8,19 +8,26 @@ export interface Tag {
 export interface ArticleSummary {
   id: number
   title: string
-  summary: string
-  status: string
-  published_at: string
-  updated_at: string
+  summary: string | null
   tags: Tag[]
+  created_at: string
+  published_at: string | null
 }
 
 /** 文章详情 */
-export interface ArticleDetail extends ArticleSummary {
+export interface ArticleDetail {
+  id: number
+  title: string
+  summary: string | null
   content_html: string
+  content_raw: string
   header_image: string | null
-  prev_article?: ArticleNav | null
-  next_article?: ArticleNav | null
+  tags: Tag[]
+  prev_article: ArticleNav | null
+  next_article: ArticleNav | null
+  created_at: string
+  updated_at: string
+  published_at: string | null
 }
 
 /** 上下篇导航 */
@@ -34,7 +41,8 @@ export interface ArticleListResponse {
   items: ArticleSummary[]
   total: number
   page: number
-  size: number
+  page_size: number
+  total_pages: number
 }
 
 /** 归档分组 */
@@ -55,7 +63,7 @@ export interface AboutArticle {
   id: number
   title: string
   content_html: string
-  published_at: string
+  content_raw: string
   updated_at: string
 }
 
@@ -70,6 +78,7 @@ export interface ArticleForm {
 /** 登录响应 */
 export interface LoginResponse {
   access_token: string
+  expires_at: string
 }
 
 /** TOC 菜单项 */

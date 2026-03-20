@@ -1,7 +1,7 @@
 /**
  * 格式化时间为 YYYY-MM-DD HH:mm
  */
-export function formatTime(dateStr: string): string {
+export function formatTime(dateStr: string | null | undefined): string {
   if (!dateStr) return ''
   const d = new Date(dateStr)
   const pad = (n: number) => String(n).padStart(2, '0')

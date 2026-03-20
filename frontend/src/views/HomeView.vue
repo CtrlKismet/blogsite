@@ -39,7 +39,7 @@ const loading = ref(false)
 async function fetchArticles(tagId: number | null = null): Promise<void> {
   loading.value = true
   try {
-    const params: { page: number; size: number; tag_id?: number } = { page: 1, size: 20 }
+    const params: { page: number; page_size: number; tag_id?: number } = { page: 1, page_size: 20 }
     if (tagId) params.tag_id = tagId
     const res = await getArticles(params)
     const items = res.data.items || []
