@@ -66,7 +66,7 @@ async def init_db() -> None:
             await session.execute(
                 text(
                     "INSERT INTO articles (id, title, summary, file_path, status, published_at) "
-                    "VALUES (0, 'about', '关于我的介绍', 'posts/about.md', 'published', "
+                    "VALUES (0, 'about', '关于我的介绍', 'posts/about/content.md', 'published', "
                     "CURRENT_TIMESTAMP)"
                 )
             )

@@ -22,7 +22,7 @@ async def get_image_path(article_id: int, filename: str, session: AsyncSession) 
     if article is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="文章不存在")
 
-    # file_path is like "posts/26-03-18-title/26-03-18-title.md"
+    # file_path is like "posts/26-03-18-title/content.md"
     article_dir = Path(article.file_path).parent
     image_path = settings.posts_path.parent / article_dir / "images" / filename
 

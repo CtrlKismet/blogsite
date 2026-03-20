@@ -202,7 +202,7 @@ async def create_article(data: ArticleCreate, session: AsyncSession) -> dict:
     now = datetime.now(UTC)
     date_prefix = now.strftime("%y-%m-%d")
     dir_name = f"{date_prefix}-{data.title}"
-    file_path = f"posts/{dir_name}/{dir_name}.md"
+    file_path = f"posts/{dir_name}/content.md"
 
     article = Article(
         title=data.title,
