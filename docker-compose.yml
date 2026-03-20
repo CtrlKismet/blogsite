@@ -7,14 +7,15 @@ services:
     container_name: blog-api
     restart: unless-stopped
     environment:
-      - DB_PATH=/data/blog.db
+      - DB_PATH=/data/db/blog.db
       - POSTS_DIR=/data/posts
       - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
       - ADMIN_USERNAME=${ADMIN_USERNAME}
       - ADMIN_PASSWORD_HASH=${ADMIN_PASSWORD_HASH}
       - TZ=Asia/Shanghai
     volumes:
-      - /mnt/nas_smb/nas/blog:/data
+      - ${DB_DIR}:/data/db
+      - ${POSTS_DIR}:/data/posts
     expose:
       - "8000"
     healthcheck:
