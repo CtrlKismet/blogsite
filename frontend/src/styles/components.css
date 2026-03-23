@@ -200,6 +200,89 @@
   color: var(--color-footer-bg);
 }
 
+/* ===== Artalk 评论区 ===== */
+#artalk-comment {
+  padding: 30px 20px;
+  border-radius: 7px;
+  margin: 5px;
+  margin-top: 30px;
+  box-shadow: 0 0 10px var(--color-card-shadow);
+  background-color: var(--color-card);
+  width: auto !important;
+}
+
+/* 覆盖 Artalk 主题变量，与博客配色统一 */
+#artalk-comment .artalk {
+  --at-color-font: var(--color-text);
+  --at-color-deep: var(--color-text);
+  --at-color-main: var(--color-secondary-solid);
+  --at-color-bg: var(--color-card);
+  --at-color-bg-transl: rgba(250, 250, 250, .94);
+  --at-color-bg-grey: #f0ece7;
+  --at-color-bg-grey-transl: rgba(240, 236, 231, .75);
+  --at-color-bg-light: rgba(255, 203, 83, .12);
+  --at-color-border: var(--color-border);
+  --at-color-meta: var(--color-text-light);
+  --at-color-gradient: linear-gradient(180deg, transparent, var(--color-card));
+}
+
+/* 发送按钮样式 */
+#artalk-comment .atk-send-btn {
+  background-color: var(--color-primary) !important;
+  color: var(--color-secondary-solid) !important;
+  border: none !important;
+  border-radius: 5px !important;
+  font-weight: bold;
+  transition: opacity var(--transition-normal);
+}
+
+#artalk-comment .atk-send-btn:hover {
+  opacity: .85;
+}
+
+/* 输入框边框样式 */
+#artalk-comment .atk-editor {
+  border-color: var(--color-border) !important;
+  border-radius: 7px !important;
+}
+
+/* 编辑器头部输入框（昵称/邮箱/网址）分隔与边框 */
+#artalk-comment .atk-main-editor > .atk-header input {
+  border: 1px solid var(--color-border-light) !important;
+  border-radius: 5px !important;
+  padding: 6px 8px !important;
+  background-color: #fff !important;
+  transition: border-color .2s, box-shadow .2s;
+}
+
+#artalk-comment .atk-main-editor > .atk-header input:not(:last-child) {
+  margin-right: 8px !important;
+}
+
+#artalk-comment .atk-main-editor > .atk-header input:focus {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 2px rgba(255, 203, 83, .3) !important;
+  outline: none !important;
+}
+
+/* 文本域聚焦样式 */
+#artalk-comment .atk-main-editor > .atk-textarea-wrap > .atk-textarea:focus {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 2px rgba(255, 203, 83, .3) !important;
+  outline: none !important;
+}
+
+/* 评论区文字选中高亮色 */
+#artalk-comment ::selection {
+  background-color: var(--color-selection-bg);
+  color: var(--color-selection-text);
+}
+
+/* 评论头像圆角与博客一致 */
+#artalk-comment .atk-avatar img {
+  border-radius: 50% !important;
+}
+
 .blog-footer .modified-time {
   padding: .4em 0;
   float: right;

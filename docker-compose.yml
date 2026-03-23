@@ -43,6 +43,23 @@ services:
       - ${DB_DIR}:/data/db
       - ${POSTS_DIR}:/data/posts:ro
 
+  # Artalk comment system
+  artalk:
+    image: artalk/artalk-go
+    container_name: blog-artalk
+    restart: unless-stopped
+    volumes:
+      - artalk_data:/data
+    expose:
+      - "23366"
+    environment:
+      - TZ=Asia/Shanghai
+    networks:
+      - caddy-net
+
+volumes:
+  artalk_data:
+
 networks:
   caddy-net:
     external: true

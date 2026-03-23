@@ -40,6 +40,8 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
+import Artalk from 'artalk'
+import 'artalk/Artalk.css'
 import type { ArticleDetail, ArticleNav, TocItem } from '../types'
 import TurnPage from '../components/article/TurnPage.vue'
 import Sidebar from '../components/layout/Sidebar.vue'
@@ -54,6 +56,7 @@ const nextArticle = ref<ArticleNav | null>(null)
 const contentRef = ref<HTMLElement | null>(null)
 const tocItems = ref<TocItem[]>([])
 const activeTocIndex = ref(0)
+let artalkInstance: Artalk | null = null
 
 function buildToc(): void {
   if (!contentRef.value) return
@@ -96,9 +99,26 @@ async function fetchArticle(id: number | string): Promise<void> {
     await nextTick()
     buildToc()
     if (contentRef.value) renderMath(contentRef.value)
+    // 初始化 Artalk 评论
+    initArtalk(res.data.title)
   } catch (e) {
     console.error('获取文章失败', e)
   }
+}
+
+function initArtalk(title: string): void {
+  // 销毁旧实例
+  if (artalkInstance) {
+    artalkInstance.destroy()
+    artalkInstance = null
+  }
+  artalkInstance = Artalk.init({
+    el: '#artalk-comment',
+    server: '/artalk',
+    site: 'CtrlKismet Blog',
+    pageKey: `/blog/${route.params.id}`,
+    pageTitle: title,
+  })
 }
 
 onMounted(() => {
@@ -108,9 +128,14 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
+  if (artalkInstance) {
+    artalkInstance.destroy()
+    artalkInstance = null
+  }
 })
 
 watch(() => route.params.id, (newId) => {
   if (newId) fetchArticle(newId as string)
 })
 </script>
+
