@@ -47,10 +47,6 @@ class TagWithCount(BaseModel):
     model_config = {"from_attributes": True}
 
 
-class TagCreate(BaseModel):
-    name: str = Field(..., min_length=1, max_length=50)
-
-
 # ─── Article schemas ─────────────────────────────────────────────────
 
 
@@ -116,65 +112,6 @@ class ArchiveGroup(BaseModel):
     articles: list[ArchiveArticle]
 
 
-# ─── Auth schemas ────────────────────────────────────────────────────
-
-
-class LoginRequest(BaseModel):
-    username: str
-    password: str
-
-
-class LoginResponse(BaseModel):
-    access_token: str
-    expires_at: datetime
-
-
-class VerifyResponse(BaseModel):
-    valid: bool
-    username: str
-    expires_at: datetime
-
-
-# ─── Admin article schemas ───────────────────────────────────────────
-
-
-class ArticleCreate(BaseModel):
-    title: str = Field(..., min_length=1, max_length=200)
-    summary: str | None = None
-    content: str = ""
-    header_image: str | None = None
-    tag_ids: list[int] = []
-    status: str = Field(default="published", pattern="^(draft|published)$")
-
-
-class ArticleUpdate(BaseModel):
-    title: str | None = Field(default=None, min_length=1, max_length=200)
-    summary: str | None = None
-    content: str | None = None
-    header_image: str | None = None
-    tag_ids: list[int] | None = None
-    status: str | None = Field(default=None, pattern="^(draft|published)$")
-
-
-class ArticleCreateOut(BaseModel):
-    id: int
-    file_path: str
-
-
-class ArticleUpdateOut(BaseModel):
-    id: int
-    updated_at: datetime
-
-
-# ─── Image schemas ───────────────────────────────────────────────────
-
-
-class ImageUploadOut(BaseModel):
-    url: str
-    filename: str
-    size: int
-
-
 # ─── Site schemas ────────────────────────────────────────────────────
 
 
@@ -182,7 +119,3 @@ class SiteInfo(BaseModel):
     site_title: str
     site_description: str
 
-
-class SiteInfoUpdate(BaseModel):
-    site_title: str | None = None
-    site_description: str | None = None

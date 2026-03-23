@@ -14,15 +14,6 @@ class Settings(BaseSettings):
     # Posts storage
     POSTS_DIR: str = "./data/posts"
 
-    # JWT
-    JWT_SECRET: str = "change-me-in-production"
-    JWT_ALGORITHM: str = "HS256"
-    JWT_EXPIRE_HOURS: int = 24
-
-    # Admin credentials
-    ADMIN_USERNAME: str = "admin"
-    ADMIN_PASSWORD_HASH: str = ""
-
     # Server
     DEBUG: bool = False
 

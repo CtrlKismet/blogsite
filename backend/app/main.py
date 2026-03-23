@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.database import init_db
-from app.routers import admin, articles, auth, images, site, tags
+from app.routers import articles, images, site, tags
 from app.schemas import ApiResponse
 
 
@@ -65,8 +65,6 @@ API_PREFIX = "/api/v1"
 app.include_router(articles.router, prefix=API_PREFIX)
 app.include_router(tags.router, prefix=API_PREFIX)
 app.include_router(images.router, prefix=API_PREFIX)
-app.include_router(auth.router, prefix=API_PREFIX)
-app.include_router(admin.router, prefix=API_PREFIX)
 app.include_router(site.router, prefix=API_PREFIX)
 
 

@@ -1,5 +1,5 @@
 services:
-  # Python FastAPI backend
+  # Python FastAPI backend (read-only API)
   api:
     build:
       context: ./backend
@@ -9,13 +9,10 @@ services:
     environment:
       - DB_PATH=/data/db/blog.db
       - POSTS_DIR=/data/posts
-      - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
-      - ADMIN_USERNAME=${ADMIN_USERNAME}
-      - ADMIN_PASSWORD_HASH=${ADMIN_PASSWORD_HASH}
       - TZ=Asia/Shanghai
     volumes:
       - ${DB_DIR}:/data/db
-      - ${POSTS_DIR}:/data/posts
+      - ${POSTS_DIR}:/data/posts:ro
     expose:
       - "8000"
     healthcheck:
@@ -26,6 +23,25 @@ services:
       start_period: 10s
     networks:
       - caddy-net
+
+  # File watcher + AI tagging service
+  watcher:
+    build:
+      context: ./watcher
+      dockerfile: Dockerfile
+    container_name: blog-watcher
+    restart: unless-stopped
+    environment:
+      - DB_PATH=/data/db/blog.db
+      - POSTS_DIR=/data/posts
+      - AI_BASE_URL=${AI_BASE_URL:-https://api.openai.com/v1}
+      - AI_API_KEY=${AI_API_KEY:-}
+      - AI_MODEL=${AI_MODEL:-gpt-4o-mini}
+      - DEBOUNCE_SECONDS=5
+      - TZ=Asia/Shanghai
+    volumes:
+      - ${DB_DIR}:/data/db
+      - ${POSTS_DIR}:/data/posts:ro
 
 networks:
   caddy-net:
