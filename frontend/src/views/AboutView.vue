@@ -31,6 +31,7 @@ import type { AboutArticle, TocItem } from '../types'
 import Sidebar from '../components/layout/Sidebar.vue'
 import { getAbout } from '../api/articles'
 import { formatTime } from '../utils/time'
+import { renderMath } from '../utils/math'
 
 const article = ref<AboutArticle | null>(null)
 const loading = ref(false)
@@ -73,6 +74,7 @@ async function fetchAbout(): Promise<void> {
     article.value = res.data
     await nextTick()
     buildToc()
+    if (contentRef.value) renderMath(contentRef.value)
   } catch (e) {
     console.error('获取 About 页面失败', e)
   } finally {

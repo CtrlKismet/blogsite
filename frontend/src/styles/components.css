@@ -301,7 +301,7 @@ aside .sculptrue > img {
   padding: .5em 0;
   font-size: .8em;
   display: grid;
-  height: 2.7em;
+  min-height: 2.7em;
   grid-template-columns: 20px auto 5em;
   align-items: center;
 }
@@ -309,7 +309,8 @@ aside .sculptrue > img {
 .blog-detail .archive-points {
   color: rgb(114, 99, 83);
   font-size: .3em;
-  margin-left: -.5em;
+  align-self: center;
+  margin-left: -1em;
   transition: color var(--transition-fast) !important;
 }
 
@@ -325,19 +326,7 @@ aside .sculptrue > img {
 
 .blog-detail .blog-ellipsis,
 .blog-detail .blog-time {
-  transition: all var(--transition-fast) !important;
-}
-
-.blog-detail:hover .blog-ellipsis {
-  font-size: 1.5em;
-  background: linear-gradient(to left, var(--color-archive-gradient-mid), var(--color-archive-gradient-start));
-  padding: .1em 0 .1em .5em;
-}
-
-.blog-detail:hover .blog-time {
-  font-size: 1.5em;
-  background: linear-gradient(to right, var(--color-archive-gradient-mid), var(--color-archive-gradient-end));
-  padding: .1em .5em .1em 0;
+  transition: none;
 }
 
 .blog-detail:hover .archive-points {

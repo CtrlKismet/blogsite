@@ -45,6 +45,7 @@ import TurnPage from '../components/article/TurnPage.vue'
 import Sidebar from '../components/layout/Sidebar.vue'
 import { getArticle } from '../api/articles'
 import { formatTime } from '../utils/time'
+import { renderMath } from '../utils/math'
 
 const route = useRoute()
 const article = ref<ArticleDetail | null>(null)
@@ -94,6 +95,7 @@ async function fetchArticle(id: number | string): Promise<void> {
     // 构建目录
     await nextTick()
     buildToc()
+    if (contentRef.value) renderMath(contentRef.value)
   } catch (e) {
     console.error('获取文章失败', e)
   }
