@@ -24,30 +24,6 @@ const routes: RouteRecordRaw[] = [
     name: 'BlogDetail',
     component: () => import('../views/BlogDetailView.vue'),
     meta: { title: '文章详情' }
-  },
-  {
-    path: '/login',
-    name: 'Login',
-    component: () => import('../views/LoginView.vue'),
-    meta: { title: '登录' }
-  },
-  {
-    path: '/admin/new',
-    name: 'NewArticle',
-    component: () => import('../views/admin/EditorView.vue'),
-    meta: { title: '新建文章', requiresAuth: true }
-  },
-  {
-    path: '/admin/edit/:id',
-    name: 'EditArticle',
-    component: () => import('../views/admin/EditorView.vue'),
-    meta: { title: '编辑文章', requiresAuth: true }
-  },
-  {
-    path: '/admin/edit/about',
-    name: 'EditAbout',
-    component: () => import('../views/admin/EditorView.vue'),
-    meta: { title: '编辑关于', requiresAuth: true }
   }
 ]
 
@@ -60,20 +36,11 @@ const router = createRouter({
   }
 })
 
-// 路由守卫：认证检查
-router.beforeEach((to, from, next) => {
-  // 更新页面标题
+// 路由守卫：更新页面标题
+router.beforeEach((to, _from, next) => {
   document.title = to.meta.title
     ? `${to.meta.title} - Blog`
     : 'Blog'
-
-  if (to.meta.requiresAuth) {
-    const token = localStorage.getItem('token')
-    if (!token) {
-      next({ name: 'Login', query: { redirect: to.fullPath } })
-      return
-    }
-  }
   next()
 })
 

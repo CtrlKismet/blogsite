@@ -67,20 +67,6 @@ export interface AboutArticle {
   updated_at: string
 }
 
-/** 编辑器表单 */
-export interface ArticleForm {
-  title: string
-  summary: string
-  header_image: string
-  content: string
-}
-
-/** 登录响应 */
-export interface LoginResponse {
-  access_token: string
-  expires_at: string
-}
-
 /** TOC 菜单项 */
 export interface TocItem {
   title: string

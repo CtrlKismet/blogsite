@@ -2,8 +2,6 @@
  * 页面可见性处理
  * 实现页面失焦时切换标题和 Favicon 的功能
  */
-import type { Router } from 'vue-router'
-
 let originalTitle = ''
 
 const FAVICON_IN = '/faviconIN.ico'
@@ -46,16 +44,4 @@ export function destroyVisibility(): void {
   document.removeEventListener('visibilitychange', handleVisibilityChange)
 }
 
-/**
- * 初始化 Alt+L 隐藏登录快捷键
- */
-export function initLoginShortcut(router: Router): () => void {
-  function handler(e: KeyboardEvent): void {
-    if (e.altKey && e.key === 'l') {
-      e.preventDefault()
-      router.push('/login')
-    }
-  }
-  document.addEventListener('keydown', handler)
-  return () => document.removeEventListener('keydown', handler)
-}
+
