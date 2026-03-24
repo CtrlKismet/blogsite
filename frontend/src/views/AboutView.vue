@@ -15,6 +15,9 @@
       <div v-else-if="!loading" style="text-align: center; padding: 2em;">
         About 页面暂未配置
       </div>
+
+      <!-- Artalk 评论区 -->
+      <div id="artalk-comment"></div>
     </main>
     <Sidebar
       mode="toc"
@@ -27,6 +30,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import Artalk from 'artalk'
+import 'artalk/Artalk.css'
 import type { AboutArticle, TocItem } from '../types'
 import Sidebar from '../components/layout/Sidebar.vue'
 import { getAbout } from '../api/articles'
@@ -38,6 +43,7 @@ const loading = ref(false)
 const contentRef = ref<HTMLElement | null>(null)
 const tocItems = ref<TocItem[]>([])
 const activeTocIndex = ref(0)
+let artalkInstance: Artalk | null = null
 
 function buildToc(): void {
   if (!contentRef.value) return
@@ -75,11 +81,27 @@ async function fetchAbout(): Promise<void> {
     await nextTick()
     buildToc()
     if (contentRef.value) renderMath(contentRef.value)
+    // 初始化 Artalk 评论
+    initArtalk()
   } catch (e) {
     console.error('获取 About 页面失败', e)
   } finally {
     loading.value = false
   }
+}
+
+function initArtalk(): void {
+  if (artalkInstance) {
+    artalkInstance.destroy()
+    artalkInstance = null
+  }
+  artalkInstance = Artalk.init({
+    el: '#artalk-comment',
+    server: '/artalk',
+    site: 'CtrlKismet Blog',
+    pageKey: '/about',
+    pageTitle: '关于我',
+  })
 }
 
 onMounted(() => {
@@ -89,5 +111,9 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
+  if (artalkInstance) {
+    artalkInstance.destroy()
+    artalkInstance = null
+  }
 })
 </script>
