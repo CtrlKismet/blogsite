@@ -89,18 +89,19 @@ async def get_article_detail(article_id: int, session: AsyncSession) -> ArticleD
     content_html = render_markdown(content_raw)
 
     # Get prev/next articles (only published, id > 0)
+    # prev = older article (smaller id), next = newer article (larger id)
     prev_result = await session.execute(
         select(Article)
-        .where(Article.id > article_id, Article.id > 0, Article.status == "published")
-        .order_by(Article.id.asc())
+        .where(Article.id < article_id, Article.id > 0, Article.status == "published")
+        .order_by(Article.id.desc())
         .limit(1)
     )
     prev_article = prev_result.scalar_one_or_none()
 
     next_result = await session.execute(
         select(Article)
-        .where(Article.id < article_id, Article.id > 0, Article.status == "published")
-        .order_by(Article.id.desc())
+        .where(Article.id > article_id, Article.id > 0, Article.status == "published")
+        .order_by(Article.id.asc())
         .limit(1)
     )
     next_article = next_result.scalar_one_or_none()
