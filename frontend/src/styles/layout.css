@@ -1,36 +1,3 @@
-/* ===== Loading Page ===== */
-.loading-page {
-  opacity: 1;
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  background-color: var(--color-primary);
-  z-index: 1000000;
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  transition: opacity 1s;
-}
-
-.loading-page .loading-icon {
-  color: var(--color-secondary-solid);
-  margin: auto;
-  font-size: 3em;
-}
-
-.loading-page .loading-text {
-  margin: auto;
-  font-size: 1em;
-  color: var(--color-secondary-solid);
-}
-
-.loading-page.fade-out {
-  opacity: 0;
-  z-index: -1;
-}
-
 /* ===== Main Page ===== */
 .main-page {
   flex: 1;
@@ -47,16 +14,8 @@
   margin-right: auto;
   display: flex;
   justify-content: space-between;
-  margin-top: 10em;
-  margin-bottom: 1.2em;
-  opacity: 0;
-  transition: opacity 2s 2.5s, margin-top .8s 2.5s;
-}
-
-/* 入场动画：loaded 后显示内容 */
-html.loaded .content {
-  opacity: 1;
   margin-top: 4.2em;
+  margin-bottom: 1.2em;
 }
 
 .content main {
@@ -72,7 +31,7 @@ html.loaded .content {
   user-select: none;
   position: fixed;
   z-index: 10000;
-  top: calc(-1 * var(--headbar-height));
+  top: 0;
   height: var(--headbar-height);
   width: 100%;
   opacity: .8;
@@ -82,15 +41,10 @@ html.loaded .content {
   display: grid;
   grid-template-columns: 18% auto 18%;
   grid-template-areas: 'home menu about';
-  transition: top 1s;
+  transition: top .3s;
 }
 
-/* 入场动画：loaded 后显示 head-bar */
-html.loaded .head-bar {
-  top: 0;
-}
-
-html.loaded .head-bar.hidden {
+.head-bar.hidden {
   top: calc(-1 * var(--headbar-height));
 }
 
@@ -98,13 +52,7 @@ html.loaded .head-bar.hidden {
   padding: 0 10px;
   height: 100%;
   line-height: 2.3em;
-  opacity: 0;
-  transition: background-color var(--transition-normal), opacity .5s 2s;
-}
-
-/* 入场动画：loaded 后显示 nav items */
-html.loaded .head-bar .nav-item {
-  opacity: 1;
+  transition: background-color var(--transition-normal);
 }
 
 .head-bar .nav-home {
@@ -135,11 +83,11 @@ html.loaded .head-bar .nav-item {
 
 /* ===== Page Transition ===== */
 .content-fade-enter-active {
-  transition: opacity 0.3s ease;
+  transition: opacity 0.5s ease;
 }
 
 .content-fade-leave-active {
-  transition: opacity 0.2s ease;
+  transition: opacity 0.35s ease;
 }
 
 .content-fade-enter-from,
@@ -159,13 +107,6 @@ html.loaded .head-bar .nav-item {
   background-color: var(--color-footer-bg);
   color: var(--color-footer-text);
   margin-top: auto;
-  opacity: 0;
-  transition: opacity 1s 4s;
-}
-
-/* 入场动画：loaded 后显示 footer */
-html.loaded .footer {
-  opacity: 1;
 }
 
 .footer a {

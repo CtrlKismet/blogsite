@@ -1,5 +1,4 @@
 <template>
-  <LoadingPage ref="loadingRef" />
   <div class="main-page">
     <NavBar />
     <router-view v-slot="{ Component }">
@@ -12,7 +11,6 @@
 </template>
 
 <script setup lang="ts">
-import LoadingPage from './components/common/LoadingPage.vue'
 import NavBar from './components/layout/NavBar.vue'
 import Footer from './components/layout/Footer.vue'
 </script>
