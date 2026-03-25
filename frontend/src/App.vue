@@ -1,11 +1,13 @@
 <template>
   <div class="main-page">
     <NavBar />
-    <router-view v-slot="{ Component }">
-      <transition name="content-fade" mode="out-in">
-        <component :is="Component" />
-      </transition>
-    </router-view>
+    <div class="page-body">
+      <router-view v-slot="{ Component }">
+        <transition name="content-fade" mode="out-in">
+          <component :is="Component" />
+        </transition>
+      </router-view>
+    </div>
     <Footer />
   </div>
 </template>

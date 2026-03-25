@@ -7,6 +7,12 @@
   box-sizing: border-box;
 }
 
+.page-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
 /* ===== Content Area ===== */
 .content {
   width: var(--content-width);
@@ -26,12 +32,12 @@
   width: var(--aside-width);
 }
 
-/* ===== Head Bar ===== */
+/* ===== Head Bar (Initial Load: slide down from top) ===== */
 .head-bar {
   user-select: none;
   position: fixed;
   z-index: 10000;
-  top: 0;
+  top: calc(-1 * var(--headbar-height));
   height: var(--headbar-height);
   width: 100%;
   opacity: .8;
@@ -41,7 +47,11 @@
   display: grid;
   grid-template-columns: 18% auto 18%;
   grid-template-areas: 'home menu about';
-  transition: top .3s;
+  transition: top .6s ease-out;
+}
+
+.head-bar.loaded {
+  top: 0;
 }
 
 .head-bar.hidden {
@@ -52,7 +62,12 @@
   padding: 0 10px;
   height: 100%;
   line-height: 2.3em;
-  transition: background-color var(--transition-normal);
+  opacity: 0;
+  transition: background-color var(--transition-normal), opacity 0.4s ease 0.5s;
+}
+
+.head-bar.loaded .nav-item {
+  opacity: 1;
 }
 
 .head-bar .nav-home {
@@ -95,7 +110,7 @@
   opacity: 0;
 }
 
-/* ===== Footer ===== */
+/* ===== Footer (JS-controlled visibility) ===== */
 .footer {
   width: 100%;
   height: var(--footer-height);
@@ -107,6 +122,12 @@
   background-color: var(--color-footer-bg);
   color: var(--color-footer-text);
   margin-top: auto;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.footer.visible {
+  opacity: 1;
 }
 
 .footer a {
