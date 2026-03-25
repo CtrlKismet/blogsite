@@ -13,7 +13,9 @@
 
   /* 文字 */
   --color-text: #333333;
+  --color-text-muted: #666666;
   --color-text-light: #939393;
+  --color-text-faint: #999999;
   --color-title: burlywood;
   --color-title-hover: brown;
 
@@ -33,6 +35,22 @@
   /* 边框 & 分割线 */
   --color-border: #ccc;
   --color-border-light: #e6e6e6;
+
+  /* 焦点环 (暖色调) */
+  --color-focus: rgba(255, 203, 83, .5);
+  --color-focus-ring: rgba(255, 203, 83, .35);
+
+  /* 标签 */
+  --color-tag: #b3b3b3;
+  --color-tag-hover: #d4d4d4;
+
+  /* 代码块 */
+  --color-code-bg: #f0f0f0;
+  --color-code-block-bg: #2d2d2d;
+  --color-code-block-text: #ccc;
+
+  /* 时钟 */
+  --color-clock-bg: #d6d6d6;
 
   /* 归档渐变 */
   --color-archive-gradient-start: #ffcb5399;
