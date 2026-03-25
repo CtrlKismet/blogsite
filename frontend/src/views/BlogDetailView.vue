@@ -95,6 +95,8 @@ async function fetchArticle(id: number | string): Promise<void> {
     article.value = res.data
     prevArticle.value = res.data.prev_article || null
     nextArticle.value = res.data.next_article || null
+    // 更新页面标题
+    document.title = `${res.data.title} | CtrlKismet's Blog`
     // 构建目录
     await nextTick()
     buildToc()

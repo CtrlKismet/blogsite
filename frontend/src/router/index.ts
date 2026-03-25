@@ -39,8 +39,8 @@ const router = createRouter({
 // 路由守卫：更新页面标题
 router.beforeEach((to, _from, next) => {
   document.title = to.meta.title
-    ? `${to.meta.title} - Blog`
-    : 'Blog'
+    ? `${to.meta.title} | CtrlKismet's Blog`
+    : "CtrlKismet's Blog"
   next()
 })
 
