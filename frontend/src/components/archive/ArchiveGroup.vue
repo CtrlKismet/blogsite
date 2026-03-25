@@ -1,8 +1,8 @@
 <template>
   <div class="blog-archive">
     <div class="archive-header">
-      <svg class="year-marker" width="14" height="14" viewBox="0 0 14 14">
-        <circle cx="7" cy="7" r="5" fill="var(--color-primary)" stroke="var(--color-secondary-solid)" stroke-width="2"/>
+      <svg class="year-marker" width="12" height="12" viewBox="0 0 12 12">
+        <circle cx="6" cy="6" r="5" fill="var(--color-secondary-solid)" stroke="none"/>
       </svg>
       <span class="archive-year">{{ year }}</span>
       <span class="archive-count">{{ articles.length }} 篇</span>

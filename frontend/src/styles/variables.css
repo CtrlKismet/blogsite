@@ -52,10 +52,10 @@
   /* 时钟 */
   --color-clock-bg: #d6d6d6;
 
-  /* 归档渐变 */
-  --color-archive-gradient-start: #ffcb5399;
-  --color-archive-gradient-mid: #ffcb5330;
-  --color-archive-gradient-end: #ffcb5320;
+  /* 归档时间轴 */
+  --color-archive-line: rgba(56, 34, 11, .15);
+  --color-archive-line-end: rgba(56, 34, 11, .05);
+  --color-archive-dot: rgba(56, 34, 11, .35);
 
   /* 尺寸 */
   --content-width: 1300px;
