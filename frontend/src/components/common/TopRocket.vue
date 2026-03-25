@@ -1,6 +1,6 @@
 <template>
   <div class="top-rocket" :class="{ visible: isVisible }" @click="scrollToTop">
-    <i class="fa fa-2x fa-arrow-up"></i>
+    <i class="fa fa-2x fa-angle-up"></i>
   </div>
 </template>
 
