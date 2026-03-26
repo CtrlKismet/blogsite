@@ -125,7 +125,7 @@ def render_markdown(content: str) -> str:
         },
         attributes={
             "*": {"class", "id", "style"},
-            "a": {"href", "title", "target", "rel"},
+            "a": {"href", "title", "target"},
             "img": {"src", "alt", "title", "width", "height", "loading"},
             "td": {"align", "valign", "colspan", "rowspan"},
             "th": {"align", "valign", "colspan", "rowspan"},
