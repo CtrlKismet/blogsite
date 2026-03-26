@@ -194,6 +194,27 @@ def delete_single(dir_name: str) -> None:
             session.commit()
 
 
+def find_articles_without_meta() -> list[tuple[int, str]]:
+    """Find published articles that lack summary or tags (for AI backfill).
+
+    Returns list of (article_id, title) for articles needing AI processing.
+    """
+    with SessionLocal() as session:
+        # Articles with no summary and no tags (excluding about page id=0)
+        result = session.execute(
+            text(
+                "SELECT a.id, a.title FROM articles a "
+                "WHERE a.id > 0 AND a.status = 'published' "
+                "AND (a.summary IS NULL OR a.summary = '') "
+                "AND NOT EXISTS ("
+                "  SELECT 1 FROM article_tags at WHERE at.article_id = a.id"
+                ") "
+                "ORDER BY a.id"
+            )
+        ).fetchall()
+        return [(row[0], row[1]) for row in result]
+
+
 def update_article_meta(article_id: int, summary: str, tag_names: list[str]) -> None:
     """Update article summary and tags from AI results."""
     with SessionLocal() as session:

@@ -10,7 +10,7 @@ from watchdog.observers import Observer
 
 from app.ai_service import generate_article_meta, get_existing_tags
 from app.config import settings
-from app.sync import delete_single, full_sync, sync_single, update_article_meta
+from app.sync import delete_single, find_articles_without_meta, full_sync, sync_single, update_article_meta
 from app.watcher import PostsEventHandler
 
 logging.basicConfig(
@@ -81,6 +81,14 @@ def main() -> None:
     # Process AI for new articles
     for article_id, title in new_articles:
         _process_new_article(article_id, title)
+
+    # ── Phase 1.5: Backfill missing AI meta ──
+    backfill = find_articles_without_meta()
+    if backfill:
+        logger.info("Backfilling AI meta for %d articles...", len(backfill))
+        for article_id, title in backfill:
+            _process_new_article(article_id, title)
+        logger.info("Backfill complete.")
 
     # ── Phase 2: Start watchdog ──
     handler = PostsEventHandler(on_change=_on_change, on_delete=_on_delete)
