@@ -17,15 +17,19 @@ import { useRouter } from 'vue-router'
 
 const isVisible = ref(false)
 const router = useRouter()
+let timeoutId: number | undefined
 
 // Initial load: show after content settles
 onMounted(() => {
-  setTimeout(() => { isVisible.value = true }, 1500)
+  timeoutId = window.setTimeout(() => { isVisible.value = true }, 1500)
 })
 
 // Route change: hide briefly, show after new content enters
 router.afterEach(() => {
   isVisible.value = false
-  setTimeout(() => { isVisible.value = true }, 1200)
+  if (timeoutId) {
+    window.clearTimeout(timeoutId)
+  }
+  timeoutId = window.setTimeout(() => { isVisible.value = true }, 1200)
 })
 </script>

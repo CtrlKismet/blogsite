@@ -3,7 +3,7 @@
     <NavBar />
     <div class="page-body">
       <router-view v-slot="{ Component }">
-        <transition name="content-fade" mode="out-in">
+        <transition name="content-fade" mode="out-in" appear>
           <component :is="Component" />
         </transition>
       </router-view>

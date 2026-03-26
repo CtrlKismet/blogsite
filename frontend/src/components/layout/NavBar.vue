@@ -27,8 +27,13 @@ function handleScroll(): void {
 }
 
 onMounted(() => {
-  // Trigger entrance animation after a frame
-  requestAnimationFrame(() => { isLoaded.value = true })
+  // Trigger entrance animation after DOM settles
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      isLoaded.value = true
+      isHidden.value = window.scrollY > topThreshold
+    })
+  })
   window.addEventListener('scroll', handleScroll)
 })
 

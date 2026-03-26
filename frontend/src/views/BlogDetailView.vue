@@ -1,9 +1,10 @@
 <template>
   <div class="content">
     <main>
-      <div class="blog" v-if="article">
-        <!-- 头图 -->
-        <div class="blog-header-image" v-if="article.header_image">
+      <transition name="blog-fade" appear>
+        <div class="blog" v-if="article">
+          <!-- 头图 -->
+          <div class="blog-header-image" v-if="article.header_image">
           <img :src="article.header_image" :alt="article.title" style="width: 100%; border-radius: 7px 7px 0 0;" />
         </div>
         <div class="blog-header">
@@ -23,6 +24,7 @@
           </span>
         </div>
       </div>
+      </transition>
 
       <TurnPage :prev="prevArticle" :next="nextArticle" />
 
@@ -57,6 +59,7 @@ const contentRef = ref<HTMLElement | null>(null)
 const tocItems = ref<TocItem[]>([])
 const activeTocIndex = ref(0)
 let artalkInstance: Artalk | null = null
+let mountTime = 0
 
 function buildToc(): void {
   if (!contentRef.value) return
@@ -92,17 +95,25 @@ function handleScroll(): void {
 async function fetchArticle(id: number | string): Promise<void> {
   try {
     const res = await getArticle(id)
-    article.value = res.data
-    prevArticle.value = res.data.prev_article || null
-    nextArticle.value = res.data.next_article || null
-    // 更新页面标题
-    document.title = `${res.data.title} | CtrlKismet's Blog`
-    // 构建目录
-    await nextTick()
-    buildToc()
-    if (contentRef.value) renderMath(contentRef.value)
-    // 初始化 Artalk 评论
-    initArtalk(res.data.title)
+    
+    // Defer heavy DOM update to prevent jank during page transition
+    const elapsed = Date.now() - mountTime
+    const delay = Math.max(0, 450 - elapsed)
+    
+    setTimeout(async () => {
+      article.value = res.data
+      prevArticle.value = res.data.prev_article || null
+      nextArticle.value = res.data.next_article || null
+      document.title = `${res.data.title} | CtrlKismet's Blog`
+      
+      await nextTick()
+      buildToc()
+      
+      setTimeout(() => {
+        if (contentRef.value) renderMath(contentRef.value)
+        initArtalk(res.data.title)
+      }, 50)
+    }, delay)
   } catch (e) {
     console.error('获取文章失败', e)
   }
@@ -124,6 +135,7 @@ function initArtalk(title: string): void {
 }
 
 onMounted(() => {
+  mountTime = Date.now()
   fetchArticle(route.params.id as string)
   window.addEventListener('scroll', handleScroll)
 })
@@ -137,7 +149,23 @@ onUnmounted(() => {
 })
 
 watch(() => route.params.id, (newId) => {
-  if (newId) fetchArticle(newId as string)
+  if (newId) {
+    mountTime = Date.now()
+    article.value = null
+    fetchArticle(newId as string)
+  }
 })
 </script>
+
+<style scoped>
+.blog-fade-enter-active,
+.blog-fade-leave-active {
+  transition: opacity 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.blog-fade-enter-from,
+.blog-fade-leave-to {
+  opacity: 0;
+}
+</style>
 
