@@ -189,6 +189,11 @@
   color: var(--color-text-faint);
 }
 
+.blog-content s a,
+.blog-content del a {
+  color: var(--color-text-faint);
+}
+
 .blog-content strong {
   color: var(--color-secondary-solid);
 }
