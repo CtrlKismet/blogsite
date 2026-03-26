@@ -1,0 +1,21 @@
+# NUC-only services: watcher + AI tagging
+# Run on NUC where NAS is mounted. Syncs to VPS via rsync cron.
+
+services:
+  watcher:
+    build:
+      context: ./watcher
+      dockerfile: Dockerfile
+    container_name: blog-watcher
+    restart: unless-stopped
+    environment:
+      - DB_PATH=/data/db/blog.db
+      - POSTS_DIR=/data/posts
+      - AI_BASE_URL=${AI_BASE_URL:-https://api.openai.com/v1}
+      - AI_API_KEY=${AI_API_KEY:-}
+      - AI_MODEL=${AI_MODEL:-gpt-4o-mini}
+      - DEBOUNCE_SECONDS=5
+      - TZ=Asia/Shanghai
+    volumes:
+      - ${DB_DIR}:/data/db
+      - ${POSTS_DIR}:/data/posts:ro

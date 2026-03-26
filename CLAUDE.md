@@ -97,8 +97,11 @@ blogsite/
 
 ### 部署
 - **容器化**: Docker + Docker Compose
-- **反向代理**: Caddy (外部 caddy-net 网络)
-- **前端部署**: Vite build → `frontend/dist/` → Caddy 挂载为 `/srv/blog`
+- **VPS**: `docker-compose.yml` — api + artalk（只读服务）
+- **NUC**: `docker-compose.watcher.yml` — watcher（文件监听 + AI）
+- **数据同步**: NUC → VPS 单向 rsync（DB + posts）
+- **反向代理**: Caddy (HTTPS + 静态前端)
+- **前端部署**: Vite build → `frontend/dist/` → Caddy 提供服务
 
 ## 数据模型
 
@@ -135,10 +138,14 @@ uv run ruff check .  # Lint 检查
 
 ### Docker
 ```bash
-# 需要先配置 .env 文件 (参考 .env.example)
-# 部署前必须先 source .env，确保环境变量被加载
+# VPS: 配置 .env 后启动 api + artalk
 source .env
-sudo docker compose up -d --build   # 构建并启动所有服务
+sudo docker compose up -d --build
+
+# NUC: 启动 watcher
+source .env
+sudo docker compose -f docker-compose.watcher.yml up -d --build
+
 sudo docker compose logs -f         # 查看日志
 ```
 
