@@ -2,6 +2,7 @@
 
 import re
 
+import nh3
 from markdown_it import MarkdownIt
 from mdit_py_plugins.dollarmath import dollarmath_plugin
 from mdit_py_plugins.footnote import footnote_plugin
@@ -105,6 +106,33 @@ def _postprocess_html(html: str) -> str:
 
 
 def render_markdown(content: str) -> str:
-    """Render Markdown text to HTML."""
+    """Render Markdown text to sanitized HTML."""
     html = _md.render(_preprocess_markdown(content))
-    return _postprocess_html(html)
+    html = _postprocess_html(html)
+    # Sanitize HTML to prevent XSS while preserving safe tags/attributes
+    return nh3.clean(
+        html,
+        tags={
+            "h1", "h2", "h3", "h4", "h5", "h6",
+            "p", "br", "hr", "blockquote", "pre", "code",
+            "ul", "ol", "li", "dl", "dt", "dd",
+            "table", "thead", "tbody", "tfoot", "tr", "th", "td",
+            "a", "img", "strong", "em", "b", "i", "u", "s", "del", "ins",
+            "sup", "sub", "mark", "abbr", "cite", "q",
+            "div", "span", "section", "article", "aside", "details", "summary",
+            "figure", "figcaption", "caption", "colgroup", "col",
+            "input",  # for task list checkboxes
+        },
+        attributes={
+            "*": {"class", "id", "style"},
+            "a": {"href", "title", "target", "rel"},
+            "img": {"src", "alt", "title", "width", "height", "loading"},
+            "td": {"align", "valign", "colspan", "rowspan"},
+            "th": {"align", "valign", "colspan", "rowspan"},
+            "input": {"type", "checked", "disabled"},
+            "div": {"align"},
+            "col": {"span"},
+            "colgroup": {"span"},
+        },
+        url_schemes={"http", "https", "mailto"},
+    )

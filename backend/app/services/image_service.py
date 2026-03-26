@@ -23,7 +23,12 @@ async def get_image_path(article_id: int, filename: str, session: AsyncSession) 
 
     # file_path is like "posts/26-03-18-title/content.md"
     article_dir = Path(article.file_path).parent
-    image_path = settings.posts_path.parent / article_dir / "images" / filename
+    images_base = (settings.posts_path.parent / article_dir / "images").resolve()
+    image_path = (images_base / filename).resolve()
+
+    # Prevent path traversal attacks
+    if not image_path.is_relative_to(images_base):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="非法文件名")
 
     if not image_path.is_file():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="图片不存在")

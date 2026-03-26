@@ -31,8 +31,8 @@ def _parse_dir_name(name: str) -> tuple[datetime, str] | None:
 
 
 def _file_hash(path: Path) -> str:
-    """Fast MD5 hash of file content."""
-    return hashlib.md5(path.read_bytes()).hexdigest()
+    """SHA-256 hash of file content for change detection."""
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def scan_posts_dir() -> dict[str, Path]:

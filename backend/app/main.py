@@ -1,11 +1,14 @@
 """FastAPI application entry point."""
 
+import logging
 from contextlib import asynccontextmanager
 from collections.abc import AsyncIterator
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+
+logger = logging.getLogger(__name__)
 
 from app.database import init_db
 from app.routers import articles, images, site, tags
@@ -27,12 +30,15 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS — allow frontend dev server
+# CORS — restrict to known origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
+    allow_origins=[
+        "https://blog.ctrlkismet.com",
+        "http://localhost:5173",  # Vite dev server
+    ],
+    allow_credentials=False,
+    allow_methods=["GET"],
     allow_headers=["*"],
 )
 
@@ -52,6 +58,7 @@ async def global_exception_handler(request: Request, exc: Exception):
                 code=exc.status_code, message=exc.detail, data=None
             ).model_dump(),
         )
+    logger.exception("Unhandled exception on %s %s", request.method, request.url.path)
     return JSONResponse(
         status_code=500,
         content=ApiResponse(code=500, message="服务器内部错误", data=None).model_dump(),
