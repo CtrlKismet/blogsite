@@ -138,12 +138,11 @@ uv run ruff check .  # Lint 检查
 
 ### Docker
 ```bash
+# .env 使用绝对路径，docker compose 自动读取，无需 source
 # VPS: 配置 .env 后启动 api + artalk
-source .env
 sudo docker compose up -d --build
 
 # NUC: 启动 watcher
-source .env
 sudo docker compose -f docker-compose.watcher.yml up -d --build
 
 sudo docker compose logs -f         # 查看日志
