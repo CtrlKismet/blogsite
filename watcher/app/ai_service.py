@@ -14,9 +14,14 @@ _SYSTEM_PROMPT = """\
 你是一个博客助手。给定一篇博客文章的 Markdown 内容，请分析并返回 JSON：
 
 {
-  "summary": "50-150字的中文摘要，概括文章核心内容",
+  "summary": "不超过15个字的摘要",
   "tags": ["标签1", "标签2"]
 }
+
+摘要规则：
+- 不超过15个字
+- 参考作者的文风和语气，用作者可能会用的方式概括
+- 不要写"本文讲述了"之类的套话，直接用一句短语概括核心
 
 标签规则：
 - 优先从已有标签中选择（如果提供了已有标签列表）
@@ -59,7 +64,7 @@ def generate_article_meta(
                 {"role": "user", "content": user_msg},
             ],
             temperature=0.3,
-            max_tokens=500,
+            max_tokens=65536,
         )
         raw = resp.choices[0].message.content or ""
         # Strip markdown code fences if present

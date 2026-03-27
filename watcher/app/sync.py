@@ -30,6 +30,14 @@ def _parse_dir_name(name: str) -> tuple[datetime, str] | None:
     return dt, title
 
 
+def _read_title(dir_name: str) -> str | None:
+    """Read original display title from .title file if it exists."""
+    title_file = Path(settings.posts_dir) / dir_name / ".title"
+    if title_file.is_file():
+        return title_file.read_text(encoding="utf-8").strip()
+    return None
+
+
 def _file_hash(path: Path) -> str:
     """SHA-256 hash of file content for change detection."""
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -90,6 +98,8 @@ def full_sync() -> list[tuple[int, str]]:
                 continue
 
             published_at, title = parsed
+            # Prefer .title file for display title
+            display_title = _read_title(dir_name) or title
 
             if file_path in db_articles:
                 # Existing article — update timestamp if content changed
@@ -99,12 +109,12 @@ def full_sync() -> list[tuple[int, str]]:
                 if stored_hash != current_hash:
                     article.updated_at = datetime.now(UTC)
                     _set_hash(session, article.id, current_hash)
-                    logger.info("Updated: [%d] %s", article.id, title)
+                    logger.info("Updated: [%d] %s", article.id, display_title)
             else:
                 # New article — insert into DB
                 now = datetime.now(UTC)
                 article = Article(
-                    title=title,
+                    title=display_title,
                     file_path=file_path,
                     status="published",
                     created_at=published_at,
@@ -114,8 +124,8 @@ def full_sync() -> list[tuple[int, str]]:
                 session.add(article)
                 session.flush()  # get id
                 _set_hash(session, article.id, _file_hash(content_path))
-                new_articles.append((article.id, title))
-                logger.info("Added: [%d] %s", article.id, title)
+                new_articles.append((article.id, display_title))
+                logger.info("Added: [%d] %s", article.id, display_title)
 
         # Delete articles whose folders no longer exist (skip about)
         for file_path, article in db_articles.items():
@@ -153,6 +163,7 @@ def sync_single(dir_name: str) -> tuple[int, str] | None:
         if parsed is None:
             return None
         published_at, title = parsed
+        display_title = _read_title(dir_name) or title
 
         if existing:
             current_hash = _file_hash(content_path)
@@ -160,13 +171,13 @@ def sync_single(dir_name: str) -> tuple[int, str] | None:
             if stored_hash != current_hash:
                 existing.updated_at = datetime.now(UTC)
                 _set_hash(session, existing.id, current_hash)
-                logger.info("Updated: [%d] %s", existing.id, title)
+                logger.info("Updated: [%d] %s", existing.id, display_title)
             session.commit()
             return None
         else:
             now = datetime.now(UTC)
             article = Article(
-                title=title,
+                title=display_title,
                 file_path=file_path,
                 status="published",
                 created_at=published_at,
@@ -177,8 +188,8 @@ def sync_single(dir_name: str) -> tuple[int, str] | None:
             session.flush()
             _set_hash(session, article.id, _file_hash(content_path))
             session.commit()
-            logger.info("Added: [%d] %s", article.id, title)
-            return (article.id, title)
+            logger.info("Added: [%d] %s", article.id, display_title)
+            return (article.id, display_title)
 
 
 def delete_single(dir_name: str) -> None:

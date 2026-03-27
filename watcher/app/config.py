@@ -16,6 +16,7 @@ class Settings:
 
     # Watcher
     debounce_seconds: float = float(os.environ.get("DEBOUNCE_SECONDS", "5"))
+    poll_interval: int = int(os.environ.get("POLL_INTERVAL", "5"))
 
     @property
     def db_url(self) -> str:

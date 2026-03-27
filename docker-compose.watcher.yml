@@ -18,4 +18,4 @@ services:
       - TZ=Asia/Shanghai
     volumes:
       - ${DB_DIR}:/data/db
-      - ${POSTS_DIR}:/data/posts:ro
+      - ${POSTS_DIR}:/data/posts
