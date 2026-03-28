@@ -12,10 +12,16 @@ services:
       - DB_PATH=/data/db/blog.db
       - POSTS_DIR=/data/posts
       - AI_BASE_URL=${AI_BASE_URL:-https://api.openai.com/v1}
-      - AI_API_KEY=${AI_API_KEY:-}
+      - AI_API_KEY_FILE=/run/secrets/ai_api_key
       - AI_MODEL=${AI_MODEL:-gpt-4o-mini}
       - DEBOUNCE_SECONDS=5
       - TZ=Asia/Shanghai
+    secrets:
+      - ai_api_key
     volumes:
       - ${DB_DIR}:/data/db
       - ${POSTS_DIR}:/data/posts
+
+secrets:
+  ai_api_key:
+    file: ./secrets/ai_api_key
