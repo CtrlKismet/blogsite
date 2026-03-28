@@ -27,14 +27,14 @@
 | 代码高亮 | highlight.js | 前端处理 |
 | 数学公式 | KaTeX | 替代原有 MathJax |
 | 评论系统 | Artalk | 自托管评论（Go + SQLite） |
-| 反向代理 | Caddy | 全局入口、自动 HTTPS (DNS-01) |
+| 反向代理 | Traefik v3 | 全局入口、自动 HTTPS (Cloudflare DNS) |
 | 部署 | Docker Compose | NUC 容器化部署 |
 
 ## 项目结构
 
 ```
 blogsite/
-├── docker-compose.yml       # 博客服务编排
+├── docker-compose.yml       # 博客服务编排（含 Traefik 路由标签）
 ├── .env                     # 环境变量（JWT 密钥、管理员凭据）
 ├── backend/                 # FastAPI 后端
 │   ├── Dockerfile
@@ -51,25 +51,28 @@ blogsite/
 │       ├── services/        # 业务逻辑
 │       └── utils/           # 工具函数
 └── frontend/                # Vue 3 前端
+    ├── Dockerfile           # nginx 容器
+    ├── nginx-spa.conf       # SPA 路由配置
     ├── package.json
     ├── vite.config.js
     ├── src/
-    └── dist/                # 构建产物（Caddy 托管）
+    └── dist/                # 构建产物（nginx 托管）
 ```
 
 ## 架构概览
 
 ```
-用户浏览器 → Caddy (HTTPS) ─┬─ /* → Vue SPA 静态文件
-                            └─ /api/* → FastAPI 容器
-                                        ├── SQLite (NAS)
-                                        └── Markdown files (NAS)
+用户浏览器 → Traefik (HTTPS) ─┬─ /*       → blog-frontend (nginx 容器)
+                              ├─ /api/*   → blog-api (FastAPI 容器)
+                              └─ /artalk/* → blog-artalk (评论容器)
+                                            ├── SQLite (NAS)
+                                            └── Markdown files (NAS)
 ```
 
-- **Caddy** 作为 NAS 全局反向代理，独立项目管理
-- **博客 API** 通过 `caddy-net` 外部网络接入
+- **Traefik v3** 作为全局反向代理，独立项目管理，通过 Cloudflare DNS 自动签发 HTTPS 证书
+- **所有容器** 通过 `traefik-proxy` 外部网络接入，使用 Docker labels 声明路由规则
 - **数据存储** 在 NAS（通过 CIFS 挂载），包括 SQLite 数据库和 Markdown 文章文件
-- **前端构建产物** 在 NUC 本地，Caddy 直接挂载
+- **前端** 构建后打包到 nginx 容器中，由 Traefik 反代
 
 ## 数据存储
 
@@ -118,7 +121,7 @@ npm run dev                            # Vite 开发服务器
 # 构建前端
 cd frontend && npm run build
 
-# 启动服务（需先启动 Caddy）
+# 启动服务（需先启动 Traefik）
 docker compose up -d --build
 ```
 

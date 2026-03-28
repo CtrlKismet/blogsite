@@ -4,7 +4,7 @@
 
 ## 项目概述
 
-个人博客系统，采用前后端分离架构。前端为 Vue 3 SPA，后端为 Python FastAPI 只读 API，配合文件监听服务（watcher）自动同步 Markdown 文章到 SQLite 数据库，评论系统使用 Artalk，反向代理使用 Caddy。
+个人博客系统，采用前后端分离架构。前端为 Vue 3 SPA，后端为 Python FastAPI 只读 API，配合文件监听服务（watcher）自动同步 Markdown 文章到 SQLite 数据库，评论系统使用 Artalk，反向代理使用 Traefik v3。
 
 ## 仓库结构
 
@@ -100,8 +100,8 @@ blogsite/
 - **VPS**: `docker-compose.yml` — api + artalk（只读服务）
 - **NUC**: `docker-compose.watcher.yml` — watcher（文件监听 + AI）
 - **数据同步**: NUC → VPS 单向 rsync（DB + posts）
-- **反向代理**: Caddy (HTTPS + 静态前端)
-- **前端部署**: Vite build → `frontend/dist/` → Caddy 提供服务
+- **反向代理**: Traefik v3 (HTTPS + Docker labels 路由)
+- **前端部署**: Vite build → `frontend/dist/` → nginx 容器 → Traefik 反代
 
 ## 数据模型
 
@@ -162,7 +162,7 @@ sudo docker compose logs -f         # 查看日志
 ## 开发注意事项
 
 - 前端开发时 Vite 会将 `/api` 代理到 `http://localhost:8000`
-- 生产环境前端为纯静态文件，由 Caddy 直接提供服务
+- 生产环境前端打包在 nginx 容器中，由 Traefik 反代提供服务
 - 数据库为 SQLite，使用 WAL 模式，watcher 和 backend 共享同一个 db 文件
 - watcher 服务在启动时执行全量同步，之后通过 watchdog 监听文件变更
 - 新文章创建后 watcher 会调用 AI 生成摘要和标签
