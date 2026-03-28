@@ -102,14 +102,8 @@ def full_sync() -> list[tuple[int, str]]:
             display_title = _read_title(dir_name) or title
 
             if file_path in db_articles:
-                # Existing article — update timestamp if content changed
-                article = db_articles[file_path]
-                current_hash = _file_hash(content_path)
-                stored_hash = _get_hash(session, article.id)
-                if stored_hash != current_hash:
-                    article.updated_at = datetime.now(UTC)
-                    _set_hash(session, article.id, current_hash)
-                    logger.info("Updated: [%d] %s", article.id, display_title)
+                # Existing article — skip, never modify existing entries
+                continue
             else:
                 # New article — insert into DB
                 now = datetime.now(UTC)
@@ -126,12 +120,6 @@ def full_sync() -> list[tuple[int, str]]:
                 _set_hash(session, article.id, _file_hash(content_path))
                 new_articles.append((article.id, display_title))
                 logger.info("Added: [%d] %s", article.id, display_title)
-
-        # Delete articles whose folders no longer exist (skip about)
-        for file_path, article in db_articles.items():
-            if file_path not in seen_paths and article.id != 0:
-                logger.info("Deleted: [%d] %s", article.id, article.title)
-                session.delete(article)
 
         session.commit()
 
@@ -166,13 +154,7 @@ def sync_single(dir_name: str) -> tuple[int, str] | None:
         display_title = _read_title(dir_name) or title
 
         if existing:
-            current_hash = _file_hash(content_path)
-            stored_hash = _get_hash(session, existing.id)
-            if stored_hash != current_hash:
-                existing.updated_at = datetime.now(UTC)
-                _set_hash(session, existing.id, current_hash)
-                logger.info("Updated: [%d] %s", existing.id, display_title)
-            session.commit()
+            # Existing article — skip, never modify existing entries
             return None
         else:
             now = datetime.now(UTC)
@@ -190,19 +172,6 @@ def sync_single(dir_name: str) -> tuple[int, str] | None:
             session.commit()
             logger.info("Added: [%d] %s", article.id, display_title)
             return (article.id, display_title)
-
-
-def delete_single(dir_name: str) -> None:
-    """Remove an article from DB when its folder is deleted."""
-    file_path = f"posts/{dir_name}/content.md"
-    with SessionLocal() as session:
-        article = session.execute(
-            select(Article).where(Article.file_path == file_path)
-        ).scalar_one_or_none()
-        if article and article.id != 0:
-            logger.info("Deleted: [%d] %s", article.id, article.title)
-            session.delete(article)
-            session.commit()
 
 
 def find_articles_without_meta() -> list[tuple[int, str]]:

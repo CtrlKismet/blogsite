@@ -13,7 +13,7 @@ from app.ai_service import generate_article_meta, get_existing_tags
 from app.config import settings
 from app.image_processor import process_images
 from app.intake import intake_loose_files
-from app.sync import delete_single, find_articles_without_meta, full_sync, sync_single, update_article_meta
+from app.sync import find_articles_without_meta, full_sync, sync_single, update_article_meta
 from app.watcher import PostsEventHandler
 
 logging.basicConfig(
@@ -129,8 +129,8 @@ def _on_change(dir_name: str) -> None:
 
 
 def _on_delete(dir_name: str) -> None:
-    """Handle article delete event."""
-    delete_single(dir_name)
+    """Ignore article delete events — never remove entries from DB."""
+    logger.debug("Ignoring delete event for: %s", dir_name)
 
 
 def main() -> None:
