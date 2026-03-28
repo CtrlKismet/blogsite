@@ -1,5 +1,19 @@
 services:
-  # Python FastAPI backend (read-only API)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: blog-frontend
+    restart: unless-stopped
+    networks:
+      - traefik-proxy
+    labels:
+      - "traefik.enable=true"
+      # 捕获域名的根路径流量
+      - "traefik.http.routers.blog-ui.rule=Host(`blog.ctrlkismet.com`)"
+      - "traefik.http.routers.blog-ui.entrypoints=websecure"
+      - "traefik.http.routers.blog-ui.tls.certresolver=myresolver" # 使用 Cloudflare 申请证书
+
   api:
     build:
       context: ./backend
@@ -22,9 +36,18 @@ services:
       retries: 3
       start_period: 10s
     networks:
-      - caddy-net
+      - traefik-proxy
+    labels:
+      - "traefik.enable=true"
+      # 拦截 /api 前缀的请求
+      - "traefik.http.routers.blog-api.rule=Host(`blog.ctrlkismet.com`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.blog-api.entrypoints=websecure"
+      - "traefik.http.routers.blog-api.tls.certresolver=myresolver"
+      - "traefik.http.services.blog-api.loadbalancer.server.port=8000"
 
-  # Artalk comment system
+      - "traefik.http.middlewares.limit-10mb.buffering.maxRequestBodyBytes=10485760"
+      - "traefik.http.routers.blog-api.middlewares=limit-10mb"
+
   artalk:
     image: artalk/artalk-go
     container_name: blog-artalk
@@ -36,11 +59,21 @@ services:
     environment:
       - TZ=Asia/Shanghai
     networks:
-      - caddy-net
+      - traefik-proxy
+    labels:
+      - "traefik.enable=true"
+      # 拦截 /artalk 前缀的请求
+      - "traefik.http.routers.blog-artalk.rule=Host(`blog.ctrlkismet.com`) && PathPrefix(`/artalk`)"
+      - "traefik.http.routers.blog-artalk.entrypoints=websecure"
+      - "traefik.http.routers.blog-artalk.tls.certresolver=myresolver"
+      - "traefik.http.services.blog-artalk.loadbalancer.server.port=23366"
+      # 动态剥离 /artalk 前缀，让后端无感接收
+      - "traefik.http.middlewares.strip-artalk.stripprefix.prefixes=/artalk"
+      - "traefik.http.routers.blog-artalk.middlewares=strip-artalk"
 
 volumes:
   artalk_data:
 
 networks:
-  caddy-net:
+  traefik-proxy:
     external: true
