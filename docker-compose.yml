@@ -25,7 +25,7 @@ services:
       - POSTS_DIR=/data/posts
       - TZ=Asia/Shanghai
     volumes:
-      - ${DB_DIR}:/data/db:ro
+      - ${DB_DIR}:/data/db
       - ${POSTS_DIR}:/data/posts:ro
     expose:
       - "8000"
