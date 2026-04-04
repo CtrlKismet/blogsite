@@ -4,7 +4,7 @@
 services:
   watcher:
     build:
-      context: ./watcher
+      context: .
       dockerfile: Dockerfile
     container_name: blog-watcher
     restart: unless-stopped
