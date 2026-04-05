@@ -51,7 +51,7 @@ blogsite/
 │       ├── services/        # 业务逻辑
 │       └── utils/           # 工具函数
 └── frontend/                # Vue 3 前端
-    ├── Dockerfile           # nginx 容器
+    ├── Dockerfile           # 多阶段构建 (node + nginx)
     ├── nginx-spa.conf       # SPA 路由配置
     ├── package.json
     ├── vite.config.js
@@ -72,7 +72,7 @@ blogsite/
 - **Traefik v3** 作为全局反向代理，独立项目管理，通过 Cloudflare DNS 自动签发 HTTPS 证书
 - **所有容器** 通过 `traefik-proxy` 外部网络接入，使用 Docker labels 声明路由规则
 - **数据存储** 在 NAS（通过 CIFS 挂载），包括 SQLite 数据库和 Markdown 文章文件
-- **前端** 构建后打包到 nginx 容器中，由 Traefik 反代
+- **前端** 在 Docker 多阶段构建中自动编译（node:22-alpine → nginx:alpine），由 Traefik 反代
 
 ## 数据存储
 
@@ -118,10 +118,7 @@ npm run dev                            # Vite 开发服务器
 ## 部署
 
 ```bash
-# 构建前端
-cd frontend && npm run build
-
-# 启动服务（需先启动 Traefik）
+# 启动服务（需先启动 Traefik，前端在 Docker 内自动构建）
 docker compose up -d --build
 ```
 

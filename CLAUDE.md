@@ -98,10 +98,10 @@ blogsite/
 ### 部署
 - **容器化**: Docker + Docker Compose
 - **VPS**: `docker-compose.yml` — api + artalk（只读服务）
-- **NUC**: `docker-compose.watcher.yml` — watcher（文件监听 + AI）
+- **NUC**: `watcher/docker-compose.yml` — watcher（文件监听 + AI）
 - **数据同步**: NUC → VPS 单向 rsync（DB + posts）
 - **反向代理**: Traefik v3 (HTTPS + Docker labels 路由)
-- **前端部署**: Vite build → `frontend/dist/` → nginx 容器 → Traefik 反代
+- **前端部署**: 多阶段 Docker 构建 (node:22-alpine → nginx:alpine) → Traefik 反代
 
 ## 数据模型
 
@@ -139,11 +139,11 @@ uv run ruff check .  # Lint 检查
 ### Docker
 ```bash
 # .env 使用绝对路径，docker compose 自动读取，无需 source
-# VPS: 配置 .env 后启动 api + artalk
+# 启动所有服务（前端在 Docker 内自动构建，无需手动 npm build）
 sudo docker compose up -d --build
 
 # NUC: 启动 watcher
-sudo docker compose -f docker-compose.watcher.yml up -d --build
+cd watcher && sudo docker compose up -d --build
 
 sudo docker compose logs -f         # 查看日志
 ```
