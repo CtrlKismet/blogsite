@@ -38,7 +38,7 @@ body {
 input,
 textarea,
 button {
-  font-family: 'PingFang SC', Calibri, 'Trebuchet MS', sans-serif;
+  font-family: var(--font-main);
   border: 1px solid var(--color-border);
   transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
 }

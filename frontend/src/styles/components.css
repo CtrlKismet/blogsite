@@ -508,7 +508,7 @@ aside {
 }
 
 aside .clock {
-  font-family: var(--font-clock);
+  font-family: var(--font-main);
   display: grid;
   grid-template-columns: 15% 15% 5% 15% 15% 5% 15% 15%;
   grid-template-rows: 90px;

@@ -65,8 +65,7 @@
   --footer-height: 3.5em;
 
   /* 字体 */
-  --font-main: 'PingFang SC', 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-  --font-clock: 'Gill Sans', 'Gill Sans MT', 'PingFang SC', Calibri, 'Trebuchet MS', sans-serif;
+  --font-main: 'Noto Sans SC', 'PingFang SC', 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 
   /* 过渡 */
   --transition-fast: .3s;
