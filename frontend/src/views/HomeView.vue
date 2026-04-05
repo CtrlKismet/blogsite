@@ -19,6 +19,7 @@
       <div v-else-if="!hasMore" style="text-align: center; padding: 2em; color: var(--color-text-light);">
         已经到底啦 .◕ᴗ◕.
       </div>
+      <div ref="sentinelRef" style="height: 1px;"></div>
     </main>
     <Sidebar
       mode="tags"
@@ -30,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import type { ArticleSummary, Tag } from '../types'
 import ArticleCard from '../components/article/ArticleCard.vue'
 import Sidebar from '../components/layout/Sidebar.vue'
@@ -43,6 +44,8 @@ const filterTag = ref<Tag | null>(null)
 const loading = ref(false)
 const currentPage = ref(1)
 const hasMore = ref(true)
+const sentinelRef = ref<HTMLElement | null>(null)
+let observer: IntersectionObserver | null = null
 
 async function fetchArticles(tagId: number | null = null, reset: boolean = true): Promise<void> {
   if (reset) {
@@ -112,13 +115,43 @@ function handleScroll(): void {
   }
 }
 
+function setupObserver(): void {
+  if (observer) observer.disconnect()
+  if (!sentinelRef.value) return
+  observer = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting && !loading.value && hasMore.value) {
+      fetchArticles(filterTag.value?.id || null, false)
+    }
+  }, { rootMargin: '500px' })
+  observer.observe(sentinelRef.value)
+}
+
+function checkSentinel(): void {
+  if (!sentinelRef.value || loading.value || !hasMore.value) return
+  const rect = sentinelRef.value.getBoundingClientRect()
+  if (rect.top < window.innerHeight + 500) {
+    fetchArticles(filterTag.value?.id || null, false)
+  }
+}
+
 onMounted(() => {
   fetchArticles()
   fetchTags()
   window.addEventListener('scroll', handleScroll)
 })
 
+watch(sentinelRef, (el) => {
+  if (el) setupObserver()
+})
+
+watch(loading, (val) => {
+  if (!val) {
+    nextTick(() => checkSentinel())
+  }
+})
+
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
+  if (observer) observer.disconnect()
 })
 </script>
