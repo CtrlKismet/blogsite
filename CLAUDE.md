@@ -55,15 +55,16 @@ blogsite/
 │   ├── tests/
 │   ├── Dockerfile
 │   └── pyproject.toml
-├── watcher/           # 文件监听 + AI 标签服务
+├── watcher/           # 文件监听服务（remote-file-notifier 消费者）
 │   ├── app/
-│   │   ├── main.py        # 启动入口：全量同步 + watchdog 监听
-│   │   ├── watcher.py     # watchdog 事件处理
-│   │   ├── sync.py        # 文章同步逻辑
-│   │   ├── ai_service.py  # AI 摘要/标签生成 (OpenAI API)
+│   │   ├── main.py        # 启动入口：全量同步 + HTTP 回调监听 + 消抖处理
+│   │   ├── sync.py        # 文章同步逻辑（含变更检测）
+│   │   ├── intake.py      # 散落 .md 文件整理
+│   │   ├── image_processor.py  # 外部图片下载本地化
 │   │   ├── config.py      # 配置
-│   │   └── database.py    # 同步 SQLAlchemy 会话
+│   │   └── database.py    # 同步 SQLAlchemy ORM
 │   ├── Dockerfile
+│   ├── docker-compose.yml # NUC 部署（接入 traefik-proxy 网络）
 │   └── pyproject.toml
 ├── docker-compose.yml # 容器编排
 ├── .env.example       # 环境变量模板
@@ -91,14 +92,17 @@ blogsite/
 - **Lint**: Ruff
 
 ### Watcher 服务
-- **文件监听**: watchdog
-- **AI 服务**: OpenAI API (可配置 base_url/model)
+- **文件监听**: remote-file-notifier (Server 端 inotify → WebSocket → Client 端 HTTP 回调)
+- **HTTP 回调**: Python 内置 `http.server`（轻量，无额外依赖）
 - **数据库**: SQLAlchemy (同步)
+- **变更检测**: SHA-256 内容 hash 对比，避免重复处理
 
 ### 部署
 - **容器化**: Docker + Docker Compose
-- **VPS**: `docker-compose.yml` — api + artalk（只读服务）
-- **NUC**: `watcher/docker-compose.yml` — watcher（文件监听 + AI）
+- **VPS**: `docker-compose.yml` — frontend + api + artalk（只读服务）
+- **NUC**: `watcher/docker-compose.yml` — watcher（remote-file-notifier 消费者）
+- **前置依赖**: NAS 上运行 `remote-file-notifier` server，NUC 上运行 client
+- **网络**: watcher 接入 `traefik-proxy` 网络，通过 Docker DNS 访问 notifier client
 - **数据同步**: NUC → VPS 单向 rsync（DB + posts）
 - **反向代理**: Traefik v3 (HTTPS + Docker labels 路由)
 - **前端部署**: 多阶段 Docker 构建 (node:22-alpine → nginx:alpine) → Traefik 反代
@@ -154,16 +158,25 @@ sudo docker compose logs -f         # 查看日志
 | 变量 | 说明 |
 |------|------|
 | `DB_DIR` | SQLite 数据库目录 (宿主机路径) |
-| `POSTS_DIR` | Markdown 文章目录 (宿主机路径) |
-| `AI_BASE_URL` | AI API 地址 (默认 OpenAI) |
-| `AI_API_KEY` | AI API 密钥 |
-| `AI_MODEL` | AI 模型名称 (默认 gpt-4o-mini) |
+| `POSTS_DIR` | Markdown 文章目录 (宿主机路径) — 同时作为 notifier watch 注册路径 |
+
+### Watcher 容器内变量（docker-compose.yml 中设定）
+| 变量 | 默认值 | 说明 |
+|------|--------|------|
+| `POSTS_DIR` | `${POSTS_DIR}` | 透传宿主路径，用于 notifier 注册 |
+| `POSTS_MOUNT` | `/data/posts` | 容器内挂载点，文件 I/O 使用 |
+| `NOTIFIER_API` | `http://remote-file-notifier-client:9877` | notifier client API 地址 |
+| `WATCH_EVENTS` | `closed,created,moved` | 监听的事件类型 |
+| `WATCH_PATTERN` | `\.md$` | 文件路径正则过滤 |
+| `WATCH_EXCLUDE` | `.meta,.title,.~*,.DS_Store,Thumbs.db` | fnmatch 排除模式 |
 
 ## 开发注意事项
 
 - 前端开发时 Vite 会将 `/api` 代理到 `http://localhost:8000`
 - 生产环境前端打包在 nginx 容器中，由 Traefik 反代提供服务
 - 数据库为 SQLite，使用 WAL 模式，watcher 和 backend 共享同一个 db 文件
-- watcher 服务在启动时执行全量同步，之后通过 watchdog 监听文件变更
-- 新文章创建后 watcher 会调用 AI 生成摘要和标签
+- watcher 启动流程：全量同步 → HTTP 回调服务器 → 向 notifier client 注册 watch → 事件循环
+- watcher 通过 SHA-256 hash 检测文章内容变更，仅在 hash 变化时触发 meta 重新提取
+- `POSTS_DIR`（宿主路径）用于 notifier 注册，`POSTS_MOUNT`（容器挂载点）用于文件读写，两者通过 `_to_local()` 前缀替换桥接
+- 新文章创建后 watcher 自动从文章内容中提取 `简介：` 和 `tag：` 行作为摘要与标签
 - 提交规范遵循 [约定式提交](https://www.conventionalcommits.org/zh-hans/)
