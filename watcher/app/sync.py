@@ -32,7 +32,7 @@ def _parse_dir_name(name: str) -> tuple[datetime, str] | None:
 
 def _read_title(dir_name: str) -> str | None:
     """Read original display title from .title file if it exists."""
-    title_file = Path(settings.posts_dir) / dir_name / ".title"
+    title_file = Path(settings.posts_mount) / dir_name / ".title"
     if title_file.is_file():
         return title_file.read_text(encoding="utf-8").strip()
     return None
@@ -45,7 +45,7 @@ def _file_hash(path: Path) -> str:
 
 def scan_posts_dir() -> dict[str, Path]:
     """Scan posts directory. Returns {dir_name: content.md path}."""
-    posts_dir = Path(settings.posts_dir)
+    posts_dir = Path(settings.posts_mount)
     result: dict[str, Path] = {}
     if not posts_dir.is_dir():
         logger.warning("Posts directory not found: %s", posts_dir)
@@ -64,7 +64,7 @@ def scan_posts_dir() -> dict[str, Path]:
 def full_sync() -> list[tuple[int, str]]:
     """Full sync: compare filesystem with DB.
 
-    Returns list of (article_id, title) for NEW articles that need AI processing.
+    Returns list of (article_id, title) for NEW articles.
     """
     fs_dirs = scan_posts_dir()
     new_articles: list[tuple[int, str]] = []
@@ -128,7 +128,7 @@ def full_sync() -> list[tuple[int, str]]:
 
 def sync_single(dir_name: str) -> tuple[int, str] | None:
     """Sync a single article directory. Returns (id, title) if NEW."""
-    content_path = Path(settings.posts_dir) / dir_name / "content.md"
+    content_path = Path(settings.posts_mount) / dir_name / "content.md"
     if not content_path.is_file():
         return None
 
@@ -154,8 +154,16 @@ def sync_single(dir_name: str) -> tuple[int, str] | None:
         display_title = _read_title(dir_name) or title
 
         if existing:
-            # Existing article — skip, never modify existing entries
-            return None
+            # Check if content actually changed via hash comparison
+            new_hash = _file_hash(content_path)
+            old_hash = _get_hash(session, existing.id)
+            if new_hash == old_hash:
+                return None  # unchanged, skip
+            _set_hash(session, existing.id, new_hash)
+            existing.updated_at = datetime.now(UTC)
+            session.commit()
+            logger.info("Modified: [%d] %s", existing.id, display_title)
+            return (existing.id, display_title)
         else:
             now = datetime.now(UTC)
             article = Article(
@@ -175,9 +183,9 @@ def sync_single(dir_name: str) -> tuple[int, str] | None:
 
 
 def find_articles_without_meta() -> list[tuple[int, str]]:
-    """Find published articles that lack summary or tags (for AI backfill).
+    """Find published articles that lack summary or tags.
 
-    Returns list of (article_id, title) for articles needing AI processing.
+    Returns list of (article_id, title) for articles needing meta update.
     """
     with SessionLocal() as session:
         # Articles with no summary and no tags (excluding about page id=0)
@@ -196,7 +204,7 @@ def find_articles_without_meta() -> list[tuple[int, str]]:
 
 
 def update_article_meta(article_id: int, summary: str, tag_names: list[str]) -> None:
-    """Update article summary and tags from AI results."""
+    """Update article summary and tags."""
     with SessionLocal() as session:
         article = session.get(Article, article_id)
         if article is None:

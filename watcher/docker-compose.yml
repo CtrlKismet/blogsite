@@ -1,5 +1,10 @@
-# NUC-only services: watcher + AI tagging
+# NUC-only services: watcher (remote-file-notifier consumer)
 # Run on NUC where NAS is mounted. Syncs to VPS via rsync cron.
+# Requires remote-file-notifier-client on traefik-proxy network.
+#
+# POSTS_DIR must be the host path — it's both the volume mount source
+# AND the path registered with the notifier client (must match the local
+# side of notifier client's path_mapping).
 
 services:
   watcher:
@@ -10,18 +15,23 @@ services:
     restart: unless-stopped
     environment:
       - DB_PATH=/data/db/blog.db
-      - POSTS_DIR=/data/posts
-      - AI_BASE_URL=${AI_BASE_URL:-https://api.openai.com/v1}
-      - AI_API_KEY_FILE=/run/secrets/ai_api_key
-      - AI_MODEL=${AI_MODEL:-gpt-4o-mini}
+      - POSTS_DIR=${POSTS_DIR}
+      - POSTS_MOUNT=${POSTS_MOUNT:-/data/posts}
       - DEBOUNCE_SECONDS=5
       - TZ=Asia/Shanghai
-    secrets:
-      - ai_api_key
+      # remote-file-notifier integration
+      - NOTIFIER_API=http://remote-file-notifier-client:9877
+      - CALLBACK_PORT=8080
+      - SELF_URL=http://blog-watcher:8080
+      - WATCH_EVENTS=closed,created,moved
+      - WATCH_PATTERN=\.md$
+      - WATCH_EXCLUDE=.meta,.title,.~*,.DS_Store,Thumbs.db
     volumes:
       - ${DB_DIR}:/data/db
-      - ${POSTS_DIR}:/data/posts
+      - ${POSTS_DIR}:${POSTS_MOUNT}
+    networks:
+      - traefik-proxy
 
-secrets:
-  ai_api_key:
-    file: ./secrets/ai_api_key
+networks:
+  traefik-proxy:
+    external: true
