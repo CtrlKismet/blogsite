@@ -23,10 +23,12 @@ services:
     environment:
       - DB_PATH=/data/db/blog.db
       - POSTS_DIR=/data/posts
+      - IMAGE_CACHE_DIR=/data/image-cache
       - TZ=Asia/Shanghai
     volumes:
       - ${DB_DIR}:/data/db
       - ${POSTS_DIR}:/data/posts:ro
+      - image_cache:/data/image-cache
     expose:
       - "8000"
     healthcheck:
@@ -72,6 +74,7 @@ services:
       - "traefik.http.routers.blog-artalk.middlewares=strip-artalk"
 
 volumes:
+  image_cache:
   artalk_data:
 
 networks:

@@ -50,6 +50,7 @@ import Sidebar from '../components/layout/Sidebar.vue'
 import { getArticle } from '../api/articles'
 import { formatTime } from '../utils/time'
 import { renderMath } from '../utils/math'
+import { prepareImageHtml } from '../utils/images'
 
 const route = useRoute()
 const article = ref<ArticleDetail | null>(null)
@@ -95,6 +96,7 @@ function handleScroll(): void {
 async function fetchArticle(id: number | string): Promise<void> {
   try {
     const res = await getArticle(id)
+    res.data.content_html = prepareImageHtml(res.data.content_html)
     
     // Defer heavy DOM update to prevent jank during page transition
     const elapsed = Date.now() - mountTime

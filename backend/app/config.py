@@ -13,6 +13,7 @@ class Settings(BaseSettings):
 
     # Posts storage
     POSTS_DIR: str = "./data/posts"
+    IMAGE_CACHE_DIR: str = "/tmp/blog-image-cache"
 
     # Server
     DEBUG: bool = False

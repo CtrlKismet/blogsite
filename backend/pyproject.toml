@@ -5,6 +5,7 @@ description = "CtrlKismet's Blog API - FastAPI backend"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "pillow>=11.0.0",
     "fastapi>=0.115.0",
     "uvicorn[standard]>=0.32.0",
     "sqlalchemy[asyncio]>=2.0.0",
