@@ -26,6 +26,8 @@ services:
       - WATCH_EVENTS=closed,created,moved
       - WATCH_PATTERN=\.md$
       - WATCH_EXCLUDE=.meta,.title,.~*,.DS_Store,Thumbs.db
+      # Optional public-origin=internal-base mappings, injected through .env.
+      - IMAGE_URL_REWRITES=${IMAGE_URL_REWRITES:-}
     volumes:
       - ${DB_DIR}:/data/db
       - ${POSTS_DIR}:${POSTS_MOUNT}

@@ -7,6 +7,8 @@ from urllib.parse import urlparse
 
 import httpx
 
+from app.config import settings
+
 logger = logging.getLogger(__name__)
 
 # Match markdown image: ![alt](http://...)
@@ -36,11 +38,32 @@ def _is_image_url(url: str) -> bool:
     return any(path.endswith(ext) for ext in _IMAGE_EXTENSIONS)
 
 
+def _internal_url(url: str) -> str:
+    """Rewrite a public image-host origin to its internal base URL, if configured.
+
+    The watcher runs in Docker: a self-hosted image host published through the
+    host's reverse proxy is often unreachable from the container, while the
+    internal service on the shared network is not.
+    """
+    parsed = urlparse(url)
+    origin = f"{parsed.scheme}://{parsed.netloc}"
+    for public, internal in settings.image_url_rewrites:
+        if origin == public:
+            suffix = parsed.path
+            if parsed.query:
+                suffix = f"{suffix}?{parsed.query}"
+            return internal + suffix
+    return url
+
+
 def _download_image(url: str, dest: Path) -> bool:
     """Download an image from URL to local path. Returns True on success."""
+    fetch_url = _internal_url(url)
+    if fetch_url != url:
+        logger.debug("Rewrote %s → %s", url, fetch_url)
     try:
         with httpx.Client(timeout=30, follow_redirects=True) as client:
-            resp = client.get(url)
+            resp = client.get(fetch_url)
             resp.raise_for_status()
             dest.parent.mkdir(parents=True, exist_ok=True)
             dest.write_bytes(resp.content)

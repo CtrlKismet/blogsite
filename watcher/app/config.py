@@ -4,6 +4,19 @@ import os
 from dataclasses import dataclass, field
 
 
+def _parse_url_rewrites(raw: str) -> list[tuple[str, str]]:
+    """Parse comma-separated "public_origin=internal_base" pairs."""
+    rewrites: list[tuple[str, str]] = []
+    for item in raw.split(","):
+        item = item.strip()
+        if "=" not in item:
+            continue
+        public, internal = (part.strip().rstrip("/") for part in item.split("=", 1))
+        if public and internal:
+            rewrites.append((public, internal))
+    return rewrites
+
+
 @dataclass(frozen=True)
 class Settings:
     db_path: str = os.environ.get("DB_PATH", "/data/db/blog.db")
@@ -34,6 +47,14 @@ class Settings:
         for e in os.environ.get("WATCH_EXCLUDE", ".meta,.title").split(",")
         if e.strip()
     ])
+
+    # ── Internal image host rewrites ──
+    # Self-hosted image hosts are reached through the host's reverse proxy,
+    # which container traffic cannot always reach (hairpin NAT / host firewall).
+    # Map their public origin to the internal service address instead.
+    image_url_rewrites: list[tuple[str, str]] = field(default_factory=lambda: _parse_url_rewrites(
+        os.environ.get("IMAGE_URL_REWRITES", "")
+    ))
 
     # Processing
     debounce_seconds: float = float(os.environ.get("DEBOUNCE_SECONDS", "5"))
