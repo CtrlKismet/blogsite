@@ -64,7 +64,7 @@ blogsite/
 │   │   ├── config.py      # 配置
 │   │   └── database.py    # 同步 SQLAlchemy ORM
 │   ├── Dockerfile
-│   ├── docker-compose.yml # NUC 部署（接入 traefik-proxy 网络）
+│   ├── docker-compose.yml # 本机部署（接入 traefik-proxy 网络）
 │   └── pyproject.toml
 ├── docker-compose.yml # 容器编排
 ├── .env.example       # 环境变量模板
@@ -99,11 +99,11 @@ blogsite/
 
 ### 部署
 - **容器化**: Docker + Docker Compose
-- **VPS**: `docker-compose.yml` — frontend + api + artalk（只读服务）
-- **NUC**: `watcher/docker-compose.yml` — watcher（remote-file-notifier 消费者）
-- **前置依赖**: NAS 上运行 `remote-file-notifier` server，NUC 上运行 client
+- **本机服务**: `docker-compose.yml` — frontend + api + artalk
+- **本机文章同步**: `watcher/docker-compose.yml` — watcher（remote-file-notifier 消费者）
+- **前置依赖**: 文件存储端运行 `remote-file-notifier` server，本机运行 client
 - **网络**: watcher 接入 `traefik-proxy` 网络，通过 Docker DNS 访问 notifier client
-- **数据同步**: NUC → VPS 单向 rsync（DB + posts）
+- **数据访问**: watcher 与 API 共享本机可访问的数据库及文章目录，可使用 NAS 挂载目录
 - **反向代理**: Traefik v3 (HTTPS + Docker labels 路由)
 - **前端部署**: 多阶段 Docker 构建 (node:22-alpine → nginx:alpine) → Traefik 反代
 
@@ -115,10 +115,10 @@ blogsite/
 
 ## API 路由
 
-后端 API 前缀为 `/api`，主要路由模块：
-- `articles` — 文章 CRUD、分页、详情
+后端 API 前缀为 `/api/v1`，主要路由模块：
+- `articles` — 文章分页、详情、归档及关于页面
 - `tags` — 标签列表、按标签筛选
-- `images` — 图片服务
+- `images` — 原图及磁盘缓存的 WebP 响应式预览
 - `site` — 站点配置信息
 
 ## 开发命令
@@ -142,14 +142,15 @@ uv run ruff check .  # Lint 检查
 
 ### Docker
 ```bash
-# .env 使用绝对路径，docker compose 自动读取，无需 source
-# 启动所有服务（前端在 Docker 内自动构建，无需手动 npm build）
-sudo docker compose up -d --build
+# 在仓库根目录准备 .env，并设置域名及数据目录
+cp .env.example .env
+# 先启动独立管理的 Traefik 与 notifier 依赖
+docker compose up -d --build
 
-# NUC: 启动 watcher
-cd watcher && sudo docker compose up -d --build
+# 在同一台主机上启动 watcher，显式复用根目录的环境变量
+docker compose --env-file .env -f watcher/docker-compose.yml up -d --build
 
-sudo docker compose logs -f         # 查看日志
+docker compose logs -f         # 查看博客服务日志
 ```
 
 ## 环境变量
@@ -157,8 +158,10 @@ sudo docker compose logs -f         # 查看日志
 参考 `.env.example`：
 | 变量 | 说明 |
 |------|------|
+| `BLOG_DOMAIN` | 博客访问域名，用于 Traefik 路由 |
 | `DB_DIR` | SQLite 数据库目录 (宿主机路径) |
 | `POSTS_DIR` | Markdown 文章目录 (宿主机路径) — 同时作为 notifier watch 注册路径 |
+| `IMAGE_URL_REWRITES` | 可选图床内网映射，格式为 `public_origin=internal_base`，多个映射用逗号分隔 |
 
 ### Watcher 容器内变量（docker-compose.yml 中设定）
 | 变量 | 默认值 | 说明 |
@@ -170,6 +173,15 @@ sudo docker compose logs -f         # 查看日志
 | `WATCH_PATTERN` | `\.md$` | 文件路径正则过滤 |
 | `WATCH_EXCLUDE` | `.meta,.title,.~*,.DS_Store,Thumbs.db` | fnmatch 排除模式 |
 
+## 文章图片加速
+
+- 本地文章图片由前端在插入正文前转换为响应式预览请求，首张立即加载，其余懒加载
+- `w` 参数仅接受 `640`、`1280`、`1920`；省略时返回原图
+- API 在线程池中生成质量 80 的 WebP，并通过原图路径、修改时间、大小及预览宽度区分缓存
+- 动图、SVG、转换失败及预览体积更大的情况返回原文件
+- `IMAGE_CACHE_DIR` 指定缓存目录；Compose 使用独立的 `image_cache` 数据卷
+- 图片浏览器缓存期限为一小时；旧磁盘缓存暂不自动清理
+
 ## 开发注意事项
 
 - 前端开发时 Vite 会将 `/api` 代理到 `http://localhost:8000`
@@ -180,3 +192,8 @@ sudo docker compose logs -f         # 查看日志
 - `POSTS_DIR`（宿主路径）用于 notifier 注册，`POSTS_MOUNT`（容器挂载点）用于文件读写，两者通过 `_to_local()` 前缀替换桥接
 - 新文章创建后 watcher 自动从文章内容中提取 `简介：` 和 `tag：` 行作为摘要与标签
 - 提交规范遵循 [约定式提交](https://www.conventionalcommits.org/zh-hans/)
+
+## 公开仓库配置
+
+- `.env` 仅存放在部署主机上，已被 Git 忽略
+- 文档及 `.env.example` 使用示例域名和通用路径；真实域名、主机地址、存储路径及凭据通过本地配置提供

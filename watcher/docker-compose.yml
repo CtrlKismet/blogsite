@@ -1,5 +1,5 @@
-# NUC-only services: watcher (remote-file-notifier consumer)
-# Run on NUC where NAS is mounted. Syncs to VPS via rsync cron.
+# Local watcher service (remote-file-notifier consumer)
+# Run alongside the blog services on the host with access to the posts directory.
 # Requires remote-file-notifier-client on traefik-proxy network.
 #
 # POSTS_DIR must be the host path — it's both the volume mount source
