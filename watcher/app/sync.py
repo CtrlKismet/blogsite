@@ -10,6 +10,8 @@ from sqlalchemy import select, text
 
 from app.config import settings
 from app.database import Article, ArticleTag, SessionLocal, Tag
+from app.metadata import load_metadata, parse_metadata
+from app.publication import local_now, parse_publication_time
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +38,15 @@ def _read_title(dir_name: str) -> str | None:
     if title_file.is_file():
         return title_file.read_text(encoding="utf-8").strip()
     return None
+
+
+def _publication_time(content_path: Path, imported_at: datetime) -> datetime:
+    """Directory dates do not contain a publication clock time."""
+    meta = load_metadata(content_path.parent / ".meta")
+    _, header = parse_metadata(content_path.read_text(encoding="utf-8"))
+    meta.update(header)
+    value = meta.get("published_at")
+    return parse_publication_time(value) if value else imported_at
 
 
 def _file_hash(path: Path) -> str:
@@ -97,7 +108,7 @@ def full_sync() -> list[tuple[int, str]]:
                 logger.warning("Skipping unrecognized dir: %s", dir_name)
                 continue
 
-            published_at, title = parsed
+            _, title = parsed
             # Prefer .title file for display title
             display_title = _read_title(dir_name) or title
 
@@ -107,11 +118,16 @@ def full_sync() -> list[tuple[int, str]]:
             else:
                 # New article — insert into DB
                 now = datetime.now(UTC)
+                try:
+                    published_at = _publication_time(content_path, local_now())
+                except (ValueError, OSError):
+                    logger.warning("Invalid publication metadata in %s; skipping", dir_name)
+                    continue
                 article = Article(
                     title=display_title,
                     file_path=file_path,
                     status="published",
-                    created_at=published_at,
+                    created_at=now,
                     updated_at=now,
                     published_at=published_at,
                 )
@@ -150,7 +166,7 @@ def sync_single(dir_name: str) -> tuple[int, str] | None:
         parsed = _parse_dir_name(dir_name)
         if parsed is None:
             return None
-        published_at, title = parsed
+        _, title = parsed
         display_title = _read_title(dir_name) or title
 
         if existing:
@@ -166,11 +182,16 @@ def sync_single(dir_name: str) -> tuple[int, str] | None:
             return (existing.id, display_title)
         else:
             now = datetime.now(UTC)
+            try:
+                published_at = _publication_time(content_path, local_now())
+            except (ValueError, OSError):
+                logger.warning("Invalid publication metadata in %s; skipping", dir_name)
+                return None
             article = Article(
                 title=display_title,
                 file_path=file_path,
                 status="published",
-                created_at=published_at,
+                created_at=now,
                 updated_at=now,
                 published_at=published_at,
             )
@@ -203,7 +224,9 @@ def find_articles_without_meta() -> list[tuple[int, str]]:
         return [(row[0], row[1]) for row in result]
 
 
-def update_article_meta(article_id: int, summary: str, tag_names: list[str]) -> None:
+def update_article_meta(
+    article_id: int, summary: str | None, tag_names: list[str] | None,
+) -> None:
     """Update article summary and tags."""
     with SessionLocal() as session:
         article = session.get(Article, article_id)
@@ -211,11 +234,15 @@ def update_article_meta(article_id: int, summary: str, tag_names: list[str]) -> 
             return
 
         # Update summary
-        article.summary = summary
+        if summary is not None:
+            article.summary = summary
+        if tag_names is None:
+            session.commit()
+            return
 
         # Resolve tags — create if not exists
         tag_ids: list[int] = []
-        for name in tag_names:
+        for name in dict.fromkeys(tag_names):
             name = name.strip()
             if not name:
                 continue
@@ -241,7 +268,7 @@ def update_article_meta(article_id: int, summary: str, tag_names: list[str]) -> 
         logger.info(
             "Meta updated: [%d] summary=%s, tags=%s",
             article_id,
-            summary[:40],
+            (summary or "")[:40],
             tag_names,
         )
 

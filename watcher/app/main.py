@@ -23,6 +23,7 @@ from app.config import settings
 from app.database import Article, SessionLocal
 from app.image_processor import process_images
 from app.intake import intake_loose_files
+from app.metadata import load_metadata, parse_metadata
 from app.sync import find_articles_without_meta, full_sync, sync_single, update_article_meta
 
 logging.basicConfig(
@@ -38,29 +39,6 @@ _stop_event = threading.Event()
 
 
 # ── Metadata extraction (extracted from main thread) ──
-
-def _extract_meta_from_content(content: str) -> tuple[str, list[str], str]:
-    """Extract summary and tags from article content lines.
-
-    Looks for lines starting with '简介：' and 'tag：' (anywhere in the file).
-    Tags are comma-separated.
-    Returns (summary, tags, cleaned_content) where cleaned_content has those lines removed.
-    """
-    summary = ""
-    tags: list[str] = []
-    kept_lines: list[str] = []
-    for line in content.splitlines(keepends=True):
-        stripped = line.strip()
-        if not summary and stripped.startswith("简介："):
-            summary = stripped[len("简介："):].strip()
-            continue
-        if not tags and stripped.lower().startswith("tag："):
-            raw = stripped[len("tag："):].strip()
-            tags = [t.strip() for t in raw.replace("，", ",").split(",") if t.strip()]
-            continue
-        kept_lines.append(line)
-    return summary, tags, "".join(kept_lines)
-
 
 def _process_new_article(article_id: int, title: str) -> None:
     """Extract summary and tags from article content and update the DB."""
@@ -78,16 +56,21 @@ def _process_new_article(article_id: int, title: str) -> None:
         return
 
     content = actual_path.read_text(encoding="utf-8")
-    summary, tags, cleaned = _extract_meta_from_content(content)
+    try:
+        cleaned, header = parse_metadata(content)
+        meta_path = actual_path.parent / ".meta"
+        metadata = load_metadata(meta_path)
+        metadata.update(header)
+    except (ValueError, OSError):
+        logger.warning("Invalid metadata for article [%d]; skipping", article_id)
+        return
 
-    if summary or tags:
-        logger.info("Extracted meta for [%d]: summary=%r, tags=%s", article_id, summary, tags)
-        update_article_meta(article_id, summary, tags)
-        if cleaned != content:
-            actual_path.write_text(cleaned, encoding="utf-8")
-            logger.info("Removed 简介/tag lines from: %s", actual_path)
-    else:
-        logger.info("No 简介/tag lines found for article [%d], skipping meta update.", article_id)
+    if "summary" in metadata or "tags" in metadata:
+        update_article_meta(article_id, metadata.get("summary"), metadata.get("tags"))
+    if header:
+        meta_path.write_text(json.dumps(metadata, ensure_ascii=False), encoding="utf-8")
+    if cleaned != content:
+        actual_path.write_text(cleaned, encoding="utf-8")
 
 
 def _process_images_for_article(article_id: int) -> None:

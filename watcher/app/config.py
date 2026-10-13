@@ -19,6 +19,7 @@ def _parse_url_rewrites(raw: str) -> list[tuple[str, str]]:
 
 @dataclass(frozen=True)
 class Settings:
+    timezone: str = os.environ.get("TZ", "Asia/Shanghai")
     db_path: str = os.environ.get("DB_PATH", "/data/db/blog.db")
     # Host path — also the watch path registered with notifier client
     posts_dir: str = os.environ.get("POSTS_DIR", "/data/posts")

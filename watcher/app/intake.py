@@ -6,14 +6,13 @@ import re
 from datetime import UTC, datetime
 from pathlib import Path
 
+from app.metadata import parse_metadata
+from app.publication import local_now, parse_publication_time
+
 logger = logging.getLogger(__name__)
 
 # Date pattern at the start of file content: YYYY/MM/DD or YYYY-MM-DD
 _DATE_RE = re.compile(r"^(\d{4})[/\-](\d{2})[/\-](\d{2})\s*$")
-
-# Metadata patterns (support both : and ：)
-_SUMMARY_RE = re.compile(r"^summary\s*[:：]\s*(.+)$", re.IGNORECASE)
-_TAG_RE = re.compile(r"^tags?\s*[:：]\s*(.+)$", re.IGNORECASE)
 
 # Characters to strip from title for directory naming
 _STRIP_CHARS = str.maketrans("", "", "『』「」《》【】")
@@ -43,57 +42,6 @@ def _parse_date_from_content(text: str) -> datetime | None:
     return None
 
 
-def _remove_date_line(text: str) -> str:
-    """Remove the date line from the beginning of content."""
-    lines = text.splitlines(keepends=True)
-    for i, line in enumerate(lines):
-        stripped = line.strip()
-        if not stripped:
-            continue
-        if _DATE_RE.match(stripped):
-            return "".join(lines[i + 1:]).lstrip("\n")
-        break
-    return text
-
-
-def _parse_and_strip_metadata(text: str) -> tuple[str, str | None, list[str] | None]:
-    """Parse and strip metadata header (date, summary, tags) from content.
-
-    Returns (cleaned_content, summary_or_None, tags_or_None).
-    """
-    lines = text.splitlines(keepends=True)
-    summary = None
-    tags = None
-    meta_end = 0  # index of first non-metadata line
-
-    for i, line in enumerate(lines):
-        stripped = line.strip()
-        if not stripped:
-            continue
-
-        if _DATE_RE.match(stripped):
-            meta_end = i + 1
-            continue
-
-        m = _SUMMARY_RE.match(stripped)
-        if m:
-            summary = m.group(1).strip()
-            meta_end = i + 1
-            continue
-
-        m = _TAG_RE.match(stripped)
-        if m:
-            raw_tags = m.group(1).strip()
-            tags = [t.strip() for t in re.split(r"[,，、;；]", raw_tags) if t.strip()]
-            meta_end = i + 1
-            continue
-
-        break  # first non-metadata line
-
-    cleaned = "".join(lines[meta_end:]).lstrip("\n")
-    return cleaned, summary, tags
-
-
 def intake_loose_files(posts_dir: Path) -> list[str]:
     """Find loose .md files in posts_dir root and organize them.
 
@@ -112,9 +60,17 @@ def intake_loose_files(posts_dir: Path) -> list[str]:
             continue
 
         content = f.read_text(encoding="utf-8")
-        dt = _parse_date_from_content(content)
+        try:
+            content_clean, meta = parse_metadata(content)
+            published_at = (
+                parse_publication_time(meta["published_at"]) if meta.get("published_at") else None
+            )
+        except ValueError:
+            logger.warning("Invalid published_at in %s; leaving file for correction", f.name)
+            continue
+        dt = published_at or _parse_date_from_content(content)
         if dt is None:
-            dt = datetime.now(UTC)
+            dt = local_now()
             logger.info("No date found in %s, using today", f.name)
 
         # Build directory name: YY-MM-DD-title
@@ -127,7 +83,6 @@ def intake_loose_files(posts_dir: Path) -> list[str]:
 
         # Create directory and move file
         article_dir.mkdir(parents=True)
-        content_clean, summary, tags = _parse_and_strip_metadata(content)
         target = article_dir / "content.md"
         target.write_text(content_clean, encoding="utf-8")
 
@@ -135,18 +90,11 @@ def intake_loose_files(posts_dir: Path) -> list[str]:
         title_file = article_dir / ".title"
         title_file.write_text(f.stem, encoding="utf-8")
 
-        # Save manual metadata if provided
-        if summary or tags:
-            meta = {}
-            if summary:
-                meta["summary"] = summary
-            if tags:
-                meta["tags"] = tags
-            meta_file = article_dir / ".meta"
-            meta_file.write_text(
+        # Keep recognized header fields available for the database sync.
+        if meta:
+            (article_dir / ".meta").write_text(
                 json.dumps(meta, ensure_ascii=False), encoding="utf-8"
             )
-            logger.info("Manual meta: summary=%s, tags=%s", summary, tags)
 
         f.unlink()  # remove original loose file
 

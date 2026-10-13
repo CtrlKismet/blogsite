@@ -60,6 +60,7 @@ blogsite/
 │   │   ├── main.py        # 启动入口：全量同步 + HTTP 回调监听 + 消抖处理
 │   │   ├── sync.py        # 文章同步逻辑（含变更检测）
 │   │   ├── intake.py      # 散落 .md 文件整理
+│   │   ├── metadata.py    # 顶部 summary/tags/published_at 解析及 .meta 读取
 │   │   ├── image_processor.py  # 外部图片下载本地化
 │   │   ├── config.py      # 配置
 │   │   └── database.py    # 同步 SQLAlchemy ORM
@@ -182,6 +183,16 @@ docker compose logs -f         # 查看博客服务日志
 - `IMAGE_CACHE_DIR` 指定缓存目录；Compose 使用独立的 `image_cache` 数据卷
 - 图片浏览器缓存期限为一小时；旧磁盘缓存暂不自动清理
 
+## 文章发布时间
+
+- 新文章的 `published_at` 默认取 watcher 首次导入的站点本地时间，不从目录日期补零生成
+- Markdown 顶部可用 `published_at: YYYY-MM-DD HH:mm:ss` 指定完整发布时间；空值或省略使用首次导入时间
+- 已有文章目录也可在首次同步前通过 `.meta` 的 `published_at` 字段指定时间
+- 不带偏移的时间按 watcher 的 `TZ` 解释；带偏移的 ISO 时间转换为站点本地时间
+- 目录日期及仅含日期的旧 Markdown 头只影响目录命名；现有文章时间不迁移，正文修改也不重置发布时间
+- 时间元信息无效时不导入相应文件或目录，避免静默丢失手动时间
+- 验证：在 `watcher/` 下运行 `.venv/bin/python -m unittest discover -s tests -v`
+
 ## 开发注意事项
 
 - 前端开发时 Vite 会将 `/api` 代理到 `http://localhost:8000`
@@ -190,7 +201,9 @@ docker compose logs -f         # 查看博客服务日志
 - watcher 启动流程：全量同步 → HTTP 回调服务器 → 向 notifier client 注册 watch → 事件循环
 - watcher 通过 SHA-256 hash 检测文章内容变更，仅在 hash 变化时触发 meta 重新提取
 - `POSTS_DIR`（宿主路径）用于 notifier 注册，`POSTS_MOUNT`（容器挂载点）用于文件读写，两者通过 `_to_local()` 前缀替换桥接
-- 新文章创建后 watcher 自动从文章内容中提取 `简介：` 和 `tag：` 行作为摘要与标签
+- watcher 仅从 Markdown 顶部元信息读取 `summary`、`tags`、`published_at`，不再扫描正文中的 `简介：` 或 `tag：`
+- 顶部元信息保存到 `.meta` 并从正文移除，摘要与标签同步入库；省略字段保留已有值，显式空摘要或空标签则清空对应值
+- `tags` 使用英文逗号分隔，也支持中文逗号、顿号及中英文分号；去除首尾空格并去重
 - 提交规范遵循 [约定式提交](https://www.conventionalcommits.org/zh-hans/)
 
 ## 公开仓库配置
