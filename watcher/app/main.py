@@ -182,31 +182,40 @@ class DebounceProcessor:
             return
 
         # created / closed / modified
+        mount = Path(settings.posts_mount)
+        p = Path(event_path)
+
+        # Loose markdown file in the posts root: let intake_loose_files organize
+        # it into a proper article directory (handled by _on_change).
+        if p.parent == mount and p.suffix.lower() == ".md":
+            logger.debug("Loose file event: %s", p.name)
+            self._debounce(f"loose:{p.name}", self._on_change, p.name)
+            return
+
         dir_name = self._get_dir_name(event_path)
         if dir_name is None:
-            # Check for loose files
-            p = Path(event_path)
-            if p.parent == Path(settings.posts_mount) and p.suffix.lower() == ".md":
-                logger.debug("Loose file event: %s", p.name)
-                self._debounce(f"loose:{p.name}", self._on_change, p.name)
             return
 
         # Only act if content.md exists (for the article dir)
-        content_md = Path(settings.posts_mount) / dir_name / "content.md"
+        content_md = mount / dir_name / "content.md"
         if content_md.is_file():
             logger.debug("Event: %s → %s", event_type, dir_name)
             self._debounce(dir_name, self._on_change, dir_name)
         else:
-            # Non-content.md file in article dir — try rename
-            p = Path(event_path)
-            if p.suffix.lower() == ".md" and p.name != "content.md":
-                if not content_md.exists():
-                    try:
-                        p.rename(content_md)
-                        logger.info("Renamed %s → content.md in %s", p.name, dir_name)
-                        self._debounce(dir_name, self._on_change, dir_name)
-                    except OSError as e:
-                        logger.error("Failed to rename %s: %s", p.name, e)
+            # A markdown file dropped directly inside the article dir (and not
+            # named content.md) is adopted as the article content.
+            if (
+                p.suffix.lower() == ".md"
+                and p.name != "content.md"
+                and p.parent == mount / dir_name
+                and not content_md.exists()
+            ):
+                try:
+                    p.rename(content_md)
+                    logger.info("Renamed %s → content.md in %s", p.name, dir_name)
+                    self._debounce(dir_name, self._on_change, dir_name)
+                except OSError as e:
+                    logger.error("Failed to rename %s: %s", p.name, e)
 
     def _debounce(self, key: str, callback, *args) -> None:
         """Debounce rapid events for the same key."""
