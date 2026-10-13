@@ -10,7 +10,7 @@ services:
     labels:
       - "traefik.enable=true"
       # 捕获域名的根路径流量
-      - "traefik.http.routers.blog-ui.rule=Host(`blog.ctrlkismet.com`)"
+      - "traefik.http.routers.blog-ui.rule=Host(`${BLOG_DOMAIN:-blog.example.com}`)"
       - "traefik.http.routers.blog-ui.entrypoints=websecure"
       - "traefik.http.routers.blog-ui.tls.certresolver=myresolver" # 使用 Cloudflare 申请证书
 
@@ -42,7 +42,7 @@ services:
     labels:
       - "traefik.enable=true"
       # 拦截 /api 前缀的请求
-      - "traefik.http.routers.blog-api.rule=Host(`blog.ctrlkismet.com`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.blog-api.rule=Host(`${BLOG_DOMAIN:-blog.example.com}`) && PathPrefix(`/api`)"
       - "traefik.http.routers.blog-api.entrypoints=websecure"
       - "traefik.http.routers.blog-api.tls.certresolver=myresolver"
       - "traefik.http.services.blog-api.loadbalancer.server.port=8000"
@@ -65,7 +65,7 @@ services:
     labels:
       - "traefik.enable=true"
       # 拦截 /artalk 前缀的请求
-      - "traefik.http.routers.blog-artalk.rule=Host(`blog.ctrlkismet.com`) && PathPrefix(`/artalk`)"
+      - "traefik.http.routers.blog-artalk.rule=Host(`${BLOG_DOMAIN:-blog.example.com}`) && PathPrefix(`/artalk`)"
       - "traefik.http.routers.blog-artalk.entrypoints=websecure"
       - "traefik.http.routers.blog-artalk.tls.certresolver=myresolver"
       - "traefik.http.services.blog-artalk.loadbalancer.server.port=23366"
