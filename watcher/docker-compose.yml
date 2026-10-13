@@ -30,7 +30,7 @@ services:
       - IMAGE_URL_REWRITES=${IMAGE_URL_REWRITES:-}
     volumes:
       - ${DB_DIR}:/data/db
-      - ${POSTS_DIR}:${POSTS_MOUNT}
+      - ${POSTS_DIR}:${POSTS_MOUNT:-/data/posts}
     networks:
       - traefik-proxy
 
