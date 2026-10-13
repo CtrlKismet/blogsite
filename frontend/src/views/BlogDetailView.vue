@@ -9,11 +9,17 @@
         </div>
         <div class="blog-header">
           <div class="blog-title">{{ article.title }}</div>
-          <div class="tag-list">
-            标签：
-            <span class="tag" v-for="tag in article.tags" :key="tag.id">
-              {{ tag.name }}
-            </span>
+          <div class="article-meta-row">
+            <div class="tag-list">
+              标签：
+              <span class="tag" v-for="tag in article.tags" :key="tag.id">
+                {{ tag.name }}
+              </span>
+            </div>
+            <div class="article-reading-info">
+              <span><i class="fa fa-file-lines" aria-hidden="true"></i>{{ article.word_count.toLocaleString('zh-CN') }} 字</span>
+              <span><i class="fa fa-clock" aria-hidden="true"></i>~{{ article.reading_minutes }} 分钟</span>
+            </div>
           </div>
         </div>
         <div class="blog-content" v-html="article.content_html" ref="contentRef"></div>

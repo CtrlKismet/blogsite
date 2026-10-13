@@ -79,6 +79,8 @@ class ArticleDetailOut(BaseModel):
     content_html: str
     content_raw: str
     header_image: str | None = None
+    word_count: int = 0
+    reading_minutes: int = 1
     tags: list[TagOut] = []
     prev_article: ArticleNav | None = None
     next_article: ArticleNav | None = None

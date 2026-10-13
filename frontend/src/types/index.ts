@@ -22,6 +22,8 @@ export interface ArticleDetail {
   content_html: string
   content_raw: string
   header_image: string | null
+  word_count: number
+  reading_minutes: number
   tags: Tag[]
   prev_article: ArticleNav | null
   next_article: ArticleNav | null

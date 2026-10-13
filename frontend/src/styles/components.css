@@ -92,6 +92,33 @@
   align-items: baseline;
 }
 
+.article-meta-row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
+.article-meta-row .tag-list {
+  flex-wrap: wrap;
+}
+
+.article-reading-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  color: var(--color-text-light);
+  font-size: .7em;
+  white-space: nowrap;
+}
+
+.article-reading-info > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
 .blog-content {
   font-size: .8em;
   font-family: var(--font-main);

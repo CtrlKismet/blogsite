@@ -18,6 +18,7 @@ from app.schemas import (
     ArchiveGroup,
 )
 from app.services.markdown_service import render_markdown
+from app.services.reading_service import reading_stats
 
 
 def _read_markdown_file(file_path: str) -> str:
@@ -87,6 +88,7 @@ async def get_article_detail(article_id: int, session: AsyncSession) -> ArticleD
     # Read and render markdown
     content_raw = _read_markdown_file(article.file_path)
     content_html = render_markdown(content_raw)
+    word_count, reading_minutes = reading_stats(content_html)
 
     # Get prev/next articles (only published, id > 0)
     # prev = older article (smaller id), next = newer article (larger id)
@@ -113,6 +115,8 @@ async def get_article_detail(article_id: int, session: AsyncSession) -> ArticleD
         content_html=content_html,
         content_raw=content_raw,
         header_image=article.header_image,
+        word_count=word_count,
+        reading_minutes=reading_minutes,
         tags=[{"id": t.id, "name": t.name} for t in article.tags],
         prev_article=ArticleNav(id=prev_article.id, title=prev_article.title)
         if prev_article
