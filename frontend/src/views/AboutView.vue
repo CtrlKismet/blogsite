@@ -38,6 +38,7 @@ import { getAbout } from '../api/articles'
 import { formatTime } from '../utils/time'
 import { renderMath } from '../utils/math'
 import { prepareImageHtml } from '../utils/images'
+import { prepareCodeBlocks } from '../utils/code'
 
 const article = ref<AboutArticle | null>(null)
 const loading = ref(false)
@@ -81,6 +82,7 @@ async function fetchAbout(): Promise<void> {
     res.data.content_html = prepareImageHtml(res.data.content_html)
     article.value = res.data
     await nextTick()
+    if (contentRef.value) prepareCodeBlocks(contentRef.value)
     buildToc()
     if (contentRef.value) renderMath(contentRef.value)
     // 初始化 Artalk 评论

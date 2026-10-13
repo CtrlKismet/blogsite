@@ -57,6 +57,7 @@ import { getArticle } from '../api/articles'
 import { formatTime } from '../utils/time'
 import { renderMath } from '../utils/math'
 import { prepareImageHtml } from '../utils/images'
+import { prepareCodeBlocks } from '../utils/code'
 
 const route = useRoute()
 const article = ref<ArticleDetail | null>(null)
@@ -115,6 +116,7 @@ async function fetchArticle(id: number | string): Promise<void> {
       document.title = `${res.data.title} | CtrlKismet's Blog`
       
       await nextTick()
+      if (contentRef.value) prepareCodeBlocks(contentRef.value)
       buildToc()
       
       setTimeout(() => {

@@ -81,6 +81,7 @@ blogsite/
 - **状态管理**: Pinia 3
 - **HTTP**: Axios
 - **Markdown 渲染**: markdown-it + KaTeX (数学公式)
+- **代码块**: 后端 Pygments 高亮，前端统一工具栏提供语言标签和一键复制
 - **评论**: Artalk
 - **图标**: Font Awesome 7
 

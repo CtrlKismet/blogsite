@@ -1,11 +1,28 @@
 """Markdown rendering service using markdown-it-py."""
 
 import re
+from html import escape
 
 import nh3
 from markdown_it import MarkdownIt
 from mdit_py_plugins.dollarmath import dollarmath_plugin
 from mdit_py_plugins.footnote import footnote_plugin
+from pygments import highlight
+from pygments.formatters import HtmlFormatter
+from pygments.lexers import get_lexer_by_name
+from pygments.util import ClassNotFound
+
+_CODE_FORMATTER = HtmlFormatter(nowrap=True, classprefix="syntax-")
+
+
+def _highlight_code(code: str, language: str, _attrs: str) -> str:
+    if not language:
+        return escape(code)
+    try:
+        lexer = get_lexer_by_name(language, stripnl=False, ensurenl=False)
+    except ClassNotFound:
+        return escape(code)
+    return highlight(code, lexer, _CODE_FORMATTER)
 
 # HTML block-level tags that need blank-line separation in CommonMark
 _BLOCK_TAGS = (
@@ -80,6 +97,7 @@ def _create_md() -> MarkdownIt:
             "breaks": True,
             "linkify": False,
             "typographer": False,
+            "highlight": _highlight_code,
         },
     )
     # Enable common extensions
