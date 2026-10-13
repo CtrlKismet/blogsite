@@ -3,7 +3,11 @@
     <main>
       <div class="filter" v-if="filterTag">
         {{ filterTag.name }} 的查询结果：
-        <span class="remove-icon" @click="removeFilter"><i class="fa fa-remove"></i></span>
+        <span class="remove-icon" @click="removeTagFilter"><i class="fa fa-remove"></i></span>
+      </div>
+      <div class="filter" v-if="filterYear !== null">
+        {{ filterYear }} 年的查询结果：
+        <span class="remove-icon" @click="removeYearFilter"><i class="fa fa-remove"></i></span>
       </div>
       <ArticleCard
         v-for="article in articles"
@@ -25,7 +29,10 @@
       mode="tags"
       :tags="tags"
       :active-tag="filterTag?.id"
+      :years="years"
+      :active-year="filterYear"
       @tag-click="onTagClick"
+      @year-click="onYearClick"
     />
   </div>
 </template>
@@ -35,36 +42,39 @@ import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import type { ArticleSummary, Tag } from '../types'
 import ArticleCard from '../components/article/ArticleCard.vue'
 import Sidebar from '../components/layout/Sidebar.vue'
-import { getArticles } from '../api/articles'
+import { getArticles, getArchive, type ArticleListParams } from '../api/articles'
 import { getTags } from '../api/tags'
 
 const articles = ref<ArticleSummary[]>([])
 const tags = ref<Tag[]>([])
 const filterTag = ref<Tag | null>(null)
+const years = ref<number[]>([])
+const filterYear = ref<number | null>(null)
 const loading = ref(false)
 const currentPage = ref(1)
 const hasMore = ref(true)
 const sentinelRef = ref<HTMLElement | null>(null)
 let observer: IntersectionObserver | null = null
+let latestRequest = 0
 
-async function fetchArticles(tagId: number | null = null, reset: boolean = true): Promise<void> {
+async function fetchArticles(reset: boolean = true): Promise<void> {
+  if (!reset && (!hasMore.value || loading.value)) return
+  const request = ++latestRequest
   if (reset) {
     currentPage.value = 1
     hasMore.value = true
     articles.value = []
   }
-  if (!hasMore.value || loading.value) return
-
   loading.value = true
+  let succeeded = false
   try {
-    const params: { page: number; page_size: number; tag_id?: number } = { page: currentPage.value, page_size: 10 }
-    if (tagId) params.tag_id = tagId
+    const params: ArticleListParams = { page: currentPage.value, page_size: 10 }
+    if (filterTag.value) params.tag_id = filterTag.value.id
+    if (filterYear.value !== null) params.year = filterYear.value
     const res = await getArticles(params)
+    if (request !== latestRequest) return
     const items = res.data.items || []
-    
-    if (items.length < params.page_size) {
-      hasMore.value = false
-    }
+    hasMore.value = currentPage.value < res.data.total_pages
 
     // 按 id 倒序排列
     items.sort((a, b) => b.id - a.id)
@@ -75,10 +85,14 @@ async function fetchArticles(tagId: number | null = null, reset: boolean = true)
       articles.value.push(...items)
     }
     currentPage.value++
+    succeeded = true
   } catch (e) {
-    console.error('获取文章列表失败', e)
+    if (request === latestRequest) console.error('获取文章列表失败', e)
   } finally {
-    loading.value = false
+    if (request === latestRequest) {
+      loading.value = false
+      if (succeeded) nextTick(() => checkSentinel())
+    }
   }
 }
 
@@ -91,18 +105,37 @@ async function fetchTags(): Promise<void> {
   }
 }
 
+async function fetchYears(): Promise<void> {
+  try {
+    const res = await getArchive()
+    years.value = [...new Set((res.data || []).map((group) => group.year))].sort((a, b) => b - a)
+  } catch (e) {
+    console.error('获取年份失败', e)
+  }
+}
+
 function onTagClick(tag: Tag): void {
   if (filterTag.value?.id === tag.id) {
-    removeFilter()
+    removeTagFilter()
     return
   }
   filterTag.value = tag
-  fetchArticles(tag.id, true)
+  fetchArticles()
 }
 
-function removeFilter(): void {
+function removeTagFilter(): void {
   filterTag.value = null
-  fetchArticles(null, true)
+  fetchArticles()
+}
+
+function onYearClick(year: number): void {
+  filterYear.value = filterYear.value === year ? null : year
+  fetchArticles()
+}
+
+function removeYearFilter(): void {
+  filterYear.value = null
+  fetchArticles()
 }
 
 function handleScroll(): void {
@@ -110,7 +143,7 @@ function handleScroll(): void {
   // 提前500px触发加载
   if (scrollTop + clientHeight >= scrollHeight - 500) {
     if (!loading.value && hasMore.value) {
-      fetchArticles(filterTag.value?.id || null, false)
+      fetchArticles(false)
     }
   }
 }
@@ -120,7 +153,7 @@ function setupObserver(): void {
   if (!sentinelRef.value) return
   observer = new IntersectionObserver((entries) => {
     if (entries[0].isIntersecting && !loading.value && hasMore.value) {
-      fetchArticles(filterTag.value?.id || null, false)
+      fetchArticles(false)
     }
   }, { rootMargin: '500px' })
   observer.observe(sentinelRef.value)
@@ -130,13 +163,14 @@ function checkSentinel(): void {
   if (!sentinelRef.value || loading.value || !hasMore.value) return
   const rect = sentinelRef.value.getBoundingClientRect()
   if (rect.top < window.innerHeight + 500) {
-    fetchArticles(filterTag.value?.id || null, false)
+    fetchArticles(false)
   }
 }
 
 onMounted(() => {
   fetchArticles()
   fetchTags()
+  fetchYears()
   window.addEventListener('scroll', handleScroll)
 })
 
@@ -144,13 +178,8 @@ watch(sentinelRef, (el) => {
   if (el) setupObserver()
 })
 
-watch(loading, (val) => {
-  if (!val) {
-    nextTick(() => checkSentinel())
-  }
-})
-
 onUnmounted(() => {
+  latestRequest++
   window.removeEventListener('scroll', handleScroll)
   if (observer) observer.disconnect()
 })

@@ -31,6 +31,17 @@
         <a @click="$emit('tagClick', tag)">{{ tag.name }}</a>
       </div>
     </div>
+    <div class="year-list" id="list_of_years" v-if="mode === 'tags' && (years ?? []).length > 0">
+      <div class="list-title">年份</div>
+      <div
+        class="list-item"
+        :class="{ 'list-item-active': activeYear === year }"
+        v-for="year in years"
+        :key="year"
+      >
+        <a href="#" @click.prevent="$emit('yearClick', year)">{{ year }} 年</a>
+      </div>
+    </div>
     <TopRocket />
   </aside>
 </template>
@@ -44,6 +55,8 @@ import TopRocket from '../common/TopRocket.vue'
 const props = defineProps<{
   tags?: Tag[]
   activeTag?: number | null
+  years?: number[]
+  activeYear?: number | null
   mode?: 'tags' | 'toc' | 'none'
   tocItems?: TocItem[]
   activeTocIndex?: number
@@ -52,6 +65,7 @@ const props = defineProps<{
 
 defineEmits<{
   tagClick: [tag: Tag]
+  yearClick: [year: number]
 }>()
 
 const chznDay: string[] = ['日', '一', '二', '三', '四', '五', '六']
