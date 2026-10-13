@@ -1,13 +1,28 @@
 <template>
   <div class="content">
     <main>
-      <div class="filter" v-if="filterTag">
-        {{ filterTag.name }} 的查询结果：
-        <span class="remove-icon" @click="removeTagFilter"><i class="fa fa-remove"></i></span>
-      </div>
-      <div class="filter" v-if="filterYear !== null">
-        {{ filterYear }} 年的查询结果：
-        <span class="remove-icon" @click="removeYearFilter"><i class="fa fa-remove"></i></span>
+      <div class="filter-bar" v-if="filterTag || filterYear !== null" aria-label="当前筛选">
+        <span class="filter-bar-label">筛选</span>
+        <span class="filter-chip" v-if="filterTag">
+          <i class="fa fa-tag" aria-hidden="true"></i>
+          <span class="filter-chip-text">{{ filterTag.name }}</span>
+          <button
+            class="filter-chip-remove"
+            type="button"
+            :aria-label="`取消标签 ${filterTag.name} 筛选`"
+            @click="removeTagFilter"
+          ><i class="fa fa-times" aria-hidden="true"></i></button>
+        </span>
+        <span class="filter-chip" v-if="filterYear !== null">
+          <i class="fa fa-calendar" aria-hidden="true"></i>
+          <span class="filter-chip-text">{{ filterYear }} 年</span>
+          <button
+            class="filter-chip-remove"
+            type="button"
+            :aria-label="`取消 ${filterYear} 年筛选`"
+            @click="removeYearFilter"
+          ><i class="fa fa-times" aria-hidden="true"></i></button>
+        </span>
       </div>
       <ArticleCard
         v-for="article in articles"

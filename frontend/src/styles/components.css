@@ -582,6 +582,11 @@ aside [class$="-list"] .list-item {
   transition: background-color var(--transition-normal);
 }
 
+aside .tag-list .list-item,
+aside .year-list .list-item {
+  font-size: .85em;
+}
+
 aside [class$="-list"] .list-item-active {
   background-color: var(--color-list-active);
 }
@@ -607,12 +612,66 @@ aside .top-rocket.visible {
 }
 
 /* ===== Filter Bar ===== */
-.filter {
-  font-size: 1em;
-  padding: 5px;
+.filter-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 5px 5px 14px;
+  font-size: .9em;
 }
 
-.filter .remove-icon {
+.filter-bar-label {
+  color: var(--color-text-muted);
+  margin-right: 4px;
+}
+
+.filter-chip {
+  display: inline-flex;
+  font-size: .85em;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  min-width: 0;
+  padding: 4px 5px 4px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 9px;
+  background: var(--color-card);
+  color: var(--color-text);
+}
+
+.filter-chip > .fa {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.filter-chip-text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.filter-chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--color-text-muted);
   cursor: pointer;
-  margin-left: 5px;
+  transition: background-color var(--transition-normal), color var(--transition-normal);
+}
+
+.filter-chip-remove:hover {
+  background: var(--color-tag-hover);
+  color: var(--color-text);
+}
+
+.filter-chip-remove:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 1px;
 }
