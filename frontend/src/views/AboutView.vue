@@ -39,6 +39,7 @@ import { formatTime } from '../utils/time'
 import { renderMath } from '../utils/math'
 import { prepareImageHtml } from '../utils/images'
 import { prepareCodeBlocks } from '../utils/code'
+import { attachImageLightbox } from '../utils/lightbox'
 
 const article = ref<AboutArticle | null>(null)
 const loading = ref(false)
@@ -46,6 +47,7 @@ const contentRef = ref<HTMLElement | null>(null)
 const tocItems = ref<TocItem[]>([])
 const activeTocIndex = ref(0)
 let artalkInstance: Artalk | null = null
+let disposeLightbox: (() => void) | null = null
 
 function buildToc(): void {
   if (!contentRef.value) return
@@ -82,6 +84,8 @@ async function fetchAbout(): Promise<void> {
     res.data.content_html = prepareImageHtml(res.data.content_html)
     article.value = res.data
     await nextTick()
+    disposeLightbox?.()
+    disposeLightbox = contentRef.value ? attachImageLightbox(contentRef.value) : null
     if (contentRef.value) prepareCodeBlocks(contentRef.value)
     buildToc()
     if (contentRef.value) renderMath(contentRef.value)
@@ -114,6 +118,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  disposeLightbox?.()
   window.removeEventListener('scroll', handleScroll)
   if (artalkInstance) {
     artalkInstance.destroy()

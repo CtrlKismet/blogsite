@@ -11,23 +11,34 @@ export function prepareImageHtml(html: string): string {
     } catch {
       return
     }
-    if (original.origin !== window.location.origin || !original.pathname.startsWith('/api/v1/images/')) return
-    const preview = (width: number) => {
-      const url = new URL(original)
-      url.searchParams.set('w', String(width))
-      return url.pathname + url.search
+    if (!['http:', 'https:'].includes(original.protocol)) return
+    img.dataset.lightboxSrc = original.href
+    if (original.origin === window.location.origin && original.pathname.startsWith('/api/v1/images/')) {
+      const preview = (width: number) => {
+        const url = new URL(original)
+        url.searchParams.set('w', String(width))
+        return url.pathname + url.search
+      }
+      img.srcset = [640, 1280, 1920].map((width) => `${preview(width)} ${width}w`).join(', ')
+      img.sizes = '(max-width: 768px) 100vw, 960px'
+      img.src = preview(1280)
     }
-    img.srcset = [640, 1280, 1920].map((width) => `${preview(width)} ${width}w`).join(', ')
-    img.sizes = '(max-width: 768px) 100vw, 960px'
-    img.src = preview(1280)
     if (!img.closest('a')) {
       const link = document.createElement('a')
       link.href = original.href
       link.target = '_blank'
       link.rel = 'noopener'
-      link.title = '查看原图'
+      link.title = '放大查看图片'
+      link.className = 'image-lightbox-link'
       img.replaceWith(link)
       link.appendChild(img)
+    } else {
+      const link = img.closest('a')!
+      if (link.href === original.href) {
+        link.classList.add('image-lightbox-link')
+      } else {
+        delete img.dataset.lightboxSrc
+      }
     }
   })
   return template.innerHTML

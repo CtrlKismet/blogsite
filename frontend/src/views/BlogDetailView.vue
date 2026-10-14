@@ -58,6 +58,7 @@ import { formatTime } from '../utils/time'
 import { renderMath } from '../utils/math'
 import { prepareImageHtml } from '../utils/images'
 import { prepareCodeBlocks } from '../utils/code'
+import { attachImageLightbox } from '../utils/lightbox'
 
 const route = useRoute()
 const article = ref<ArticleDetail | null>(null)
@@ -68,6 +69,7 @@ const tocItems = ref<TocItem[]>([])
 const activeTocIndex = ref(0)
 let artalkInstance: Artalk | null = null
 let mountTime = 0
+let disposeLightbox: (() => void) | null = null
 
 function buildToc(): void {
   if (!contentRef.value) return
@@ -116,6 +118,8 @@ async function fetchArticle(id: number | string): Promise<void> {
       document.title = `${res.data.title} | CtrlKismet's Blog`
       
       await nextTick()
+      disposeLightbox?.()
+      disposeLightbox = contentRef.value ? attachImageLightbox(contentRef.value) : null
       if (contentRef.value) prepareCodeBlocks(contentRef.value)
       buildToc()
       
@@ -151,6 +155,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  disposeLightbox?.()
   window.removeEventListener('scroll', handleScroll)
   if (artalkInstance) {
     artalkInstance.destroy()
@@ -160,6 +165,8 @@ onUnmounted(() => {
 
 watch(() => route.params.id, (newId) => {
   if (newId) {
+    disposeLightbox?.()
+    disposeLightbox = null
     mountTime = Date.now()
     article.value = null
     fetchArticle(newId as string)
