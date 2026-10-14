@@ -53,18 +53,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { computed, ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import type { ArticleSummary, Tag } from '../types'
 import ArticleCard from '../components/article/ArticleCard.vue'
 import Sidebar from '../components/layout/Sidebar.vue'
 import { getArticles, getArchive, type ArticleListParams } from '../api/articles'
 import { getTags } from '../api/tags'
+import { parseFilterInteger } from '../utils/filters'
 
+const route = useRoute()
+const router = useRouter()
 const articles = ref<ArticleSummary[]>([])
 const tags = ref<Tag[]>([])
-const filterTag = ref<Tag | null>(null)
+const filterTagId = computed(() => parseFilterInteger(route.query.tag_id))
+const filterTag = computed<Tag | null>(() => {
+  const id = filterTagId.value
+  if (id === null) return null
+  return tags.value.find((tag) => tag.id === id) || { id, name: `标签 #${id}` }
+})
 const years = ref<number[]>([])
-const filterYear = ref<number | null>(null)
+const filterYear = computed(() => parseFilterInteger(route.query.year, 9999))
 const loading = ref(false)
 const currentPage = ref(1)
 const hasMore = ref(true)
@@ -84,7 +93,7 @@ async function fetchArticles(reset: boolean = true): Promise<void> {
   let succeeded = false
   try {
     const params: ArticleListParams = { page: currentPage.value, page_size: 10 }
-    if (filterTag.value) params.tag_id = filterTag.value.id
+    if (filterTagId.value !== null) params.tag_id = filterTagId.value
     if (filterYear.value !== null) params.year = filterYear.value
     const res = await getArticles(params)
     if (request !== latestRequest) return
@@ -129,28 +138,29 @@ async function fetchYears(): Promise<void> {
   }
 }
 
+function setFilters(tagId: number | null, year: number | null): void {
+  const query = { ...route.query }
+  delete query.tag_id
+  delete query.year
+  if (tagId !== null) query.tag_id = String(tagId)
+  if (year !== null) query.year = String(year)
+  void router.push({ path: route.path, query, hash: route.hash })
+}
+
 function onTagClick(tag: Tag): void {
-  if (filterTag.value?.id === tag.id) {
-    removeTagFilter()
-    return
-  }
-  filterTag.value = tag
-  fetchArticles()
+  setFilters(filterTagId.value === tag.id ? null : tag.id, filterYear.value)
 }
 
 function removeTagFilter(): void {
-  filterTag.value = null
-  fetchArticles()
+  setFilters(null, filterYear.value)
 }
 
 function onYearClick(year: number): void {
-  filterYear.value = filterYear.value === year ? null : year
-  fetchArticles()
+  setFilters(filterTagId.value, filterYear.value === year ? null : year)
 }
 
 function removeYearFilter(): void {
-  filterYear.value = null
-  fetchArticles()
+  setFilters(filterTagId.value, null)
 }
 
 function handleScroll(): void {
@@ -183,11 +193,14 @@ function checkSentinel(): void {
 }
 
 onMounted(() => {
-  fetchArticles()
   fetchTags()
   fetchYears()
   window.addEventListener('scroll', handleScroll)
 })
+
+watch([filterTagId, filterYear], () => {
+  if (route.name === 'Home') fetchArticles()
+}, { immediate: true })
 
 watch(sentinelRef, (el) => {
   if (el) setupObserver()
